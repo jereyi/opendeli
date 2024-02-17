@@ -1,0 +1,42 @@
+{
+  "name": "opendeli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jereyi/opendeli.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jereyi/opendeli/issues"
+  },
+  "homepage": "https://github.com/jereyi/opendeli#readme",
+  "dependencies": {
+    "dotenv": "^16.4.4",
+    "express": "^4.17.1",
+    "mysql2": "^2.3.3"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.19",
+    "jest": "^27.4.5",
+    "nodemon": "^3.0.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "testRegex": "(/test/.*|(\\.|/)(test))\\.(js)x?$"
+  }
+}
