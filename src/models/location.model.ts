@@ -4,8 +4,6 @@ import sequelize from "../configs/db.config";
 const Location = sequelize.define(
   "Location",
   {
-      // Model attributes are defined here
-      // QQQ: Can we assume US location?
     id: {
       type: DataTypes.UUID,
       allowNull: false,
@@ -24,6 +22,9 @@ const Location = sequelize.define(
     },
     postalCode: {
       type: DataTypes.STRING,
+    },
+    comments: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
     },
     createdAt: {
       type: DataTypes.DATE,

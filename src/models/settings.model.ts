@@ -11,7 +11,6 @@ const Settings = sequelize.define(
     },
     // Documentation on usage: https://sequelize.org/api/v6/class/src/data-types.js~geometry
     // TODO: Add PostGis extension: https://postgis.net/documentation/getting_started/
-    // QQQ: Where do we want to host our DB?
     deliveryPolygon: {
       type: DataTypes.GEOGRAPHY,
     },
@@ -29,7 +28,7 @@ const Settings = sequelize.define(
     },
     // days of the week (keys) => an array of time ranges (values)
     shiftAvailability: {
-      type: DataTypes.HSTORE,
+      type: DataTypes.JSON,
     },
     // Guard array against duplicates
     orderPreferences: {
@@ -42,7 +41,7 @@ const Settings = sequelize.define(
     },
     // Structure: daily or weekly (keys) => goal amount (values)
     earningsGoals: {
-      type: DataTypes.HSTORE,
+      type: DataTypes.JSON,
     },
     deliverySpeed: {
       type: DataTypes.ENUM("regular", "rush"),
@@ -94,7 +93,7 @@ const Settings = sequelize.define(
       // surge_pricing_preference, or minimum_earnings_guarantee (keys)
       // => amount (value)
     payRate: {
-      type: DataTypes.HSTORE,
+      type: DataTypes.JSON,
     },
     createdAt: {
       type: DataTypes.DATE,

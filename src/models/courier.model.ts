@@ -1,9 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../configs/db.config";
 
-// QQQ: Does not seem necessary for each courier to store a reference
-// to the node since it will always be the same. 
-// QQQ: Fulfilment modes essential for the MVP because we are only supporting delivery.
 const Courier = sequelize.define(
   "Courier",
   {
@@ -28,7 +25,7 @@ const Courier = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    cellPhoneNumber: {
+    phoneNumber: {
       type: DataTypes.STRING,
     },
     isAvailable: {
