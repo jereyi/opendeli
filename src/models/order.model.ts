@@ -1,20 +1,34 @@
-import { DataTypes } from "sequelize";
+import { DataTypes, GeographyDataType, Model } from "sequelize";
 import sequelize from "../configs/db.config";
+import { OrderStatus } from "../utils/enum.util";
+import { Item } from "../utils/types.util";
 
-const Order = sequelize.define(
-  "Order",
+class Order extends Model {
+  declare id: number;
+  declare customerName: string;
+  declare status: OrderStatus;
+  declare customerNotes: string;
+  declare courierNotes: string;
+  declare exactPickupCoords: GeographyDataType;
+  declare exactDropOffCoords: GeographyDataType;
+  declare items: Item[];
+  declare undeliverableAction: string;
+  declare undeliverableReason: string;
+  declare currencyCode: string;
+  declare grossRevenue: number;
+  declare fees: number;
+  declare pay: number;
+  declare deliveryTime: Date;
+  declare createdAt: Date;
+  declare updatedAt: Date;
+}
+
+Order.init(
   {
     // Model attributes are defined here
     id: {
       type: DataTypes.UUID,
-      allowNull: false,
-    },
-    merchantId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-    },
-    merchantInfo: {
-      type: DataTypes.JSON,
+      primaryKey: true,
       allowNull: false,
     },
     customerName: {
@@ -22,7 +36,13 @@ const Order = sequelize.define(
       allowNull: false,
     },
     status: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM(
+        "created",
+        "dispatched",
+        "picked_up",
+        "dropped_off",
+        "canceled"
+      ),
       allowNull: false,
     },
     customerNotes: {
@@ -31,13 +51,12 @@ const Order = sequelize.define(
     courierNotes: {
       type: DataTypes.STRING,
     },
-    // We are storing coordinates as JSON objects to allow for
-    // both exact and obfuscated coordinates
-    pickupCoords: {
-      type: DataTypes.JSON,
+    // TODO: Handle obfuscated coord
+    exactPickupCoords: {
+      type: DataTypes.GEOGRAPHY,
       allowNull: false,
     },
-    dropoffCoords: {
+    exactDropoffCoords: {
       type: DataTypes.JSON,
       allowNull: false,
     },
@@ -50,23 +69,28 @@ const Order = sequelize.define(
     undeliverableReason: {
       type: DataTypes.STRING,
     },
-    return: {
-      type: DataTypes.JSON,
-    },
-    currency: {
+    // ISO 4217 Currency Code (e.g. U.S. Dollar -> USD)
+    currencyCode: {
       type: DataTypes.STRING,
     },
-    totalCharge: {
+    // Total amount earned for this order (pay + fees)
+    grossRevenue: {
       type: DataTypes.NUMBER,
     },
+    // Fees associated with the delivery of this order
     fees: {
       type: DataTypes.NUMBER,
     },
+    // Driver's compensation for this order (before tips)
     pay: {
       type: DataTypes.NUMBER,
     },
     tips: {
       type: DataTypes.NUMBER,
+    },
+    deliveryTime: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -80,10 +104,9 @@ const Order = sequelize.define(
     },
   },
   {
-    // Other model options go here
+    tableName: "orders",
+    sequelize,
   }
 );
-
-Order.belongsTo(sequelize.models.courier);
 
 export default Order;

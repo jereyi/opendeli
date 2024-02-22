@@ -1,12 +1,33 @@
-import { DataTypes } from "sequelize";
+import { DataTypes, GeographyDataType, Model } from "sequelize";
 import sequelize from "../configs/db.config";
+import { VehicleType, OrderPreferences, FoodPreferences, DeliverySpeed, RestaurantTypes, CuisineTypes, DietaryRestrictions } from "../utils/enum.util";
+import { ShiftAvailability, EarningGoals, PayRate } from "../utils/types.util";
 
-const Settings = sequelize.define(
-  "Settings",
+class Settings extends Model {
+  declare id: number;
+  declare deliveryPolygon: GeographyDataType | null;
+  declare vehicleType: VehicleType | null;
+  declare preferredAreas: string[] | null;
+  declare shiftAvailability: ShiftAvailability | null;
+  declare orderPreferences: OrderPreferences | null;
+  declare foodPreferences: FoodPreferences | null;
+  declare earningGoals: EarningGoals | null;
+  declare deliverySpeed: DeliverySpeed | null;
+  declare restaurantTypes: RestaurantTypes | null;
+  declare cuisineType: CuisineTypes | null;
+  declare preferredRestaurantPartners: string[] | null;
+  declare dietaryRestrictions: DietaryRestrictions | null;
+  declare payRate: PayRate | null;
+  declare createdAt: Date;
+  declare updatedAt: Date;
+}
+
+Settings.init(
   {
     // Model attributes are defined here
     id: {
       type: DataTypes.UUID,
+      primaryKey: true,
       allowNull: false,
     },
     // Documentation on usage: https://sequelize.org/api/v6/class/src/data-types.js~geometry
@@ -26,7 +47,6 @@ const Settings = sequelize.define(
     preferredAreas: {
       type: DataTypes.ARRAY(DataTypes.STRING),
     },
-    // days of the week (keys) => an array of time ranges (values)
     shiftAvailability: {
       type: DataTypes.JSON,
     },
@@ -36,7 +56,7 @@ const Settings = sequelize.define(
         DataTypes.ENUM("small_orders", "medium_orders", "large_orders")
       ),
     },
-    foodPreference: {
+    foodPreferences: {
       type: DataTypes.ARRAY(DataTypes.ENUM("hot", "cold", "fragile")),
     },
     // Structure: daily or weekly (keys) => goal amount (values)
@@ -84,14 +104,21 @@ const Settings = sequelize.define(
     preferredRestaurantPartners: {
       type: DataTypes.ARRAY(DataTypes.STRING),
     },
-    specificFoodTypePreferences: {
+    dietaryRestrictions: {
       type: DataTypes.ARRAY(
-        DataTypes.ENUM("vegan", "vegetarian", "halal", "kosher", "organic", "no_alcohol")
+        DataTypes.ENUM(
+          "vegan",
+          "vegetarian",
+          "halal",
+          "kosher",
+          "organic",
+          "alcohol_free"
+        )
       ),
-      },
-      // hourly_date, per_delivery_rate, distance_based_rate, 
-      // surge_pricing_preference, or minimum_earnings_guarantee (keys)
-      // => amount (value)
+    },
+    // hourly_date, per_delivery_rate, distance_based_rate,
+    // surge_pricing_preference, or minimum_earnings_guarantee (keys)
+    // => amount (value)
     payRate: {
       type: DataTypes.JSON,
     },
@@ -108,9 +135,9 @@ const Settings = sequelize.define(
   },
   {
     // Other model options go here
+    tableName: 'settings',
+    sequelize
   }
 );
-
-Settings.belongsTo(sequelize.models.courier);
 
 export default Settings;
