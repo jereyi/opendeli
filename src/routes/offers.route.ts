@@ -5,11 +5,12 @@ import {
   getOffer,
   updateOffer,
 } from "../controllers/offers.controller";
+import { verifyToken } from "../middlewares/auth.middleware";
 
-router.get("/", getOffers);
+router.get("/", verifyToken, getOffers);
 
-router.get("/:id", getOffer);
+router.get("/:id", verifyToken, getOffer);
 
-router.patch("/:id", updateOffer);
+router.patch("/:id", verifyToken, updateOffer);
 
 export default router;

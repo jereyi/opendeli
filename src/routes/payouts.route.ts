@@ -5,11 +5,12 @@ import {
   connectInitiate,
   connectCallback,
 } from "../controllers/payouts.controller";
+import { verifyToken } from "../middlewares/auth.middleware";
 
-router.post("/", requestPayout);
+router.post("/", verifyToken, requestPayout);
 
-router.get("/stripe/connect/initiate", connectInitiate);
+router.get("/stripe/connect/initiate", verifyToken, connectInitiate);
 
-router.get("/stripe/connect/callback", connectCallback);
+router.get("/stripe/connect/callback", verifyToken, connectCallback);
 
 export default router;

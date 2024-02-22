@@ -9,20 +9,20 @@ import {
   updateCourierNotes,
   reportIssue,
 } from "../controllers/deliveries.controller";
+import { verifyToken } from "../middlewares/auth.middleware";
 
-router.get("/", getDeliveries);
+router.get("/", verifyToken, getDeliveries);
 
-router.get("/:id", getDelivery);
+router.get("/:id", verifyToken, getDelivery);
 
-router.get(":id/items", getDeliveryItems);
+router.get(":id/items", verifyToken, getDeliveryItems);
 
-router.patch(":id/status", updateDeliveryStatus);
+router.patch(":id/status", verifyToken, updateDeliveryStatus);
 
-router.post("/:id/contact-customer", contactCustomer);
+router.post("/:id/contact-customer", verifyToken, contactCustomer);
 
-// Should this not be patch?
-router.post("/:id", updateCourierNotes);
+router.patch("/:id", verifyToken, updateCourierNotes);
 
-router.post("/:id/report-issue", reportIssue);
+router.post("/:id/report-issue", verifyToken, reportIssue);
 
 export default router;

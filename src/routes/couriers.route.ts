@@ -6,26 +6,27 @@ import {
   updateCourierFullSettings,
   updateCourierAvailability,
   updateCourierOrderSetting,
-  updateCourierNode,
-  getCourierNodes,
-  updateCourierNodes,
+  updateCourierLocation,
   getCourierQuickAccessSettings,
 } from "../controllers/couriers.controller";
+import { verifyToken } from "../middlewares/auth.middleware";
 
-router.get("/", getCourier);
+router.get("/", verifyToken, getCourier);
 
-router.get("/full-settings", getCourierFullSettings);
+router.get("/full-settings", verifyToken, getCourierFullSettings);
 
-router.patch("/full-settings", updateCourierFullSettings);
+router.patch("/full-settings", verifyToken, updateCourierFullSettings);
 
-router.patch("/availability", updateCourierAvailability);
+router.patch("/availability", verifyToken, updateCourierAvailability);
 
-router.patch("/order-setting", updateCourierOrderSetting);
+router.patch("/order-setting", verifyToken, updateCourierOrderSetting);
 
-// Clarify what the desired functionality of these endpoints are
-router.patch("/node", updateCourierNode);
-router.get("/nodes", getCourierNodes);
-router.post("/nodes", updateCourierNodes);
-router.get("/quick-access-settings", getCourierQuickAccessSettings);
+router.patch("/track", verifyToken, updateCourierLocation);
+
+router.get(
+  "/quick-access-settings",
+  verifyToken,
+  getCourierQuickAccessSettings
+);
 
 export default router;

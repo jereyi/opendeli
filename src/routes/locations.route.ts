@@ -6,13 +6,14 @@ import {
   updateLocationComment,
   upvoteLocationComment,
 } from "../controllers/locations.controller";
+import { verifyToken } from "../middlewares/auth.middleware";
 
-router.get("/", getLocationComments);
+router.get("/", verifyToken, getLocationComments);
 
-router.post("/", createLocationComment);
+router.post("/", verifyToken, createLocationComment);
 
-router.patch("/:id", updateLocationComment);
+router.patch("/:id", verifyToken, updateLocationComment);
 
-router.patch("/:id", upvoteLocationComment);
+router.patch("/:id", verifyToken, upvoteLocationComment);
 
 export default router;
