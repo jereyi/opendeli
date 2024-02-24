@@ -4,15 +4,16 @@ import Courier from "../models/courier.model";
 import { LoginReqBody, SignupReqBody } from "../reqBodies/auth";
 import jwt from "jsonwebtoken";
 
-// TODO: Add session logic
 export async function signup(
   req: Request<{}, {}, SignupReqBody>,
   res: Response
 ) {
   try {
-    const { email, password, phoneNumber, remember_me } = req.body;
+    const { firstName, lastName, email, password, phoneNumber } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     await Courier.create({
+      firstName,
+      lastName,
       email,
       password: hashedPassword,
       phoneNumber,
@@ -20,6 +21,7 @@ export async function signup(
 
     res.status(201).json({ message: "Courier registered successfully" });
   } catch (error) {
+    console.log("Registration Error", error)
     res.status(500).json({ error: "Registration failed" });
   }
 }

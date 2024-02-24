@@ -32,3 +32,8 @@ export type Item = {
   weight: number;
   keepUpright: boolean;
 };
+
+export type Coordinate = {
+  longitude: number | number[];
+  latitude: number | number[];
+}

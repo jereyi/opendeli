@@ -1,5 +1,6 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "../configs/db.config";
+var db = require("./db"),
+  sequelize = db.sequelize;
 
 class Location extends Model {
   declare id: number;
@@ -18,6 +19,7 @@ Location.init(
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false,
+      defaultValue: DataTypes.UUIDV4,
     },
     address: {
       type: DataTypes.STRING,

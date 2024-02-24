@@ -1,8 +1,7 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "../configs/db.config";
-import Settings from "./settings.model";
-import Earning from "./earning.model";
 import { OrderSetting } from "../utils/enum.util";
+var db = require("./db"),
+  sequelize = db.sequelize;
 
 // TODO: Add indices, primary keys, and default
 
@@ -25,11 +24,12 @@ Courier.init(
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
-      autoIncrement: true,
+      allowNull: false,
+      defaultValue: DataTypes.UUIDV4,
     },
     node_uri: {
       type: DataTypes.STRING,
-      defaultValue: process.env.APP_URI // TODO: Set up this environment variable
+      defaultValue: process.env.APP_URI, // TODO: Set up this environment variable
     },
     firstName: {
       type: DataTypes.STRING,
@@ -72,8 +72,8 @@ Courier.init(
     },
   },
   {
-    tableName: 'couriers',
-    sequelize
+    tableName: "couriers",
+    sequelize,
   }
 );
 

@@ -1,5 +1,6 @@
 import { DataTypes, Model } from "sequelize";
-import sequelize from "../configs/db.config";
+var db = require("./db"),
+  sequelize = db.sequelize;
 
 // TODO: Add indices, primary keys, and default
 class Merchant extends Model {
@@ -17,7 +18,8 @@ Merchant.init(
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
-      autoIncrement: true,
+      allowNull: false,
+      defaultValue: DataTypes.UUIDV4,
     },
     name: {
       type: DataTypes.STRING,

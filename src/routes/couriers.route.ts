@@ -1,6 +1,7 @@
 import { Router } from "express";
 const router = Router();
 import {
+  getCouriers,
   getCourier,
   getCourierFullSettings,
   updateCourierFullSettings,
@@ -11,7 +12,9 @@ import {
 } from "../controllers/couriers.controller";
 import { verifyToken } from "../middlewares/auth.middleware";
 
-router.get("/", verifyToken, getCourier);
+router.get("/", verifyToken, getCouriers);
+
+router.get("/:id", verifyToken, getCourier);
 
 router.get("/full-settings", verifyToken, getCourierFullSettings);
 

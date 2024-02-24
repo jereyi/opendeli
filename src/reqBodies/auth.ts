@@ -4,7 +4,7 @@ export type SignupReqBody = {
     email: string;
     password: string;
     phoneNumber: string;
-    remember_me?: boolean;
+    rememberMe?: boolean;
 }
 
 export type LoginReqBody = {

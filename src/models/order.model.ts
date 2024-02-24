@@ -1,7 +1,8 @@
-import { DataTypes, GeographyDataType, Model } from "sequelize";
-import sequelize from "../configs/db.config";
+import { DataTypes, Model } from "sequelize";
 import { OrderStatus } from "../utils/enum.util";
-import { Item } from "../utils/types.util";
+import { Coordinate, Item } from "../utils/types.util";
+var db = require("./db"),
+  sequelize = db.sequelize;
 
 class Order extends Model {
   declare id: number;
@@ -9,8 +10,8 @@ class Order extends Model {
   declare status: OrderStatus;
   declare customerNotes: string;
   declare courierNotes: string;
-  declare exactPickupCoords: GeographyDataType;
-  declare exactDropOffCoords: GeographyDataType;
+  declare pickupCoords: Coordinate;
+  declare dropOffCoords: Coordinate;
   declare items: Item[];
   declare undeliverableAction: string;
   declare undeliverableReason: string;
@@ -30,6 +31,7 @@ Order.init(
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false,
+      defaultValue: DataTypes.UUIDV4,
     },
     customerName: {
       type: DataTypes.STRING,
@@ -52,11 +54,11 @@ Order.init(
       type: DataTypes.STRING,
     },
     // TODO: Handle obfuscated coord
-    exactPickupCoords: {
-      type: DataTypes.GEOGRAPHY,
+    pickupCoords: {
+      type: DataTypes.JSON,
       allowNull: false,
     },
-    exactDropoffCoords: {
+    dropoffCoords: {
       type: DataTypes.JSON,
       allowNull: false,
     },
@@ -75,18 +77,18 @@ Order.init(
     },
     // Total amount earned for this order (pay + fees)
     grossRevenue: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.INTEGER,
     },
     // Fees associated with the delivery of this order
     fees: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.INTEGER,
     },
     // Driver's compensation for this order (before tips)
     pay: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.INTEGER,
     },
     tips: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.INTEGER,
     },
     deliveryTime: {
       type: DataTypes.DATE,
