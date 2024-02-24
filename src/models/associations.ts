@@ -6,14 +6,18 @@ import Location from "./location.model"
 import Order from "./order.model";
 
 Courier.hasMany(Earning, {
+  sourceKey: "id",
+  foreignKey: "courierId",
+  as: "earnings",
   onDelete: "CASCADE",
 });
-Earning.belongsTo(Courier);
 
+Settings.belongsTo(Courier, { targetKey: "id" });
 Courier.hasOne(Settings, {
+  sourceKey: "id",
   onDelete: "CASCADE",
 });
-Settings.belongsTo(Courier);
+
 
 Location.hasMany(Merchant);
 Merchant.hasMany(Location);

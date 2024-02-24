@@ -1,21 +1,74 @@
-import { DataTypes, Model } from "sequelize";
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  HasManyAddAssociationMixin,
+  HasManyGetAssociationsMixin,
+  HasManyRemoveAssociationMixin,
+  HasManySetAssociationsMixin,
+  HasManyAddAssociationsMixin,
+  HasManyRemoveAssociationsMixin,
+  HasManyHasAssociationMixin,
+  HasManyHasAssociationsMixin,
+  HasManyCountAssociationsMixin,
+  HasManyCreateAssociationMixin,
+  HasOneGetAssociationMixin,
+  HasOneSetAssociationMixin,
+  HasOneCreateAssociationMixin,
+  NonAttribute,
+  Association,
+  GeographyDataType,
+} from "sequelize";
 import { OrderSetting } from "../utils/enum.util";
+import { Point } from "../utils/types.util";
+import Settings from "./settings.model";
+import Earning from "./earning.model";
 var db = require("./db"),
   sequelize = db.sequelize;
 
 // TODO: Add indices, primary keys, and default
 
-class Courier extends Model {
-  declare id: number;
+class Courier extends Model<
+  InferAttributes<Courier, { omit: "settings" | "earnings" }>,
+  InferCreationAttributes<Courier, { omit: "settings" | "earnings" }>
+> {
+  declare id: CreationOptional<string>;
   declare firstName: string;
   declare lastName: string;
   declare email: string;
   declare password: string;
   declare phoneNumber: string | null;
-  declare isAvailable: boolean | null;
+  declare node_uri: CreationOptional<string>;
+  declare isAvailable: CreationOptional<boolean>;
   declare orderSetting: OrderSetting | null;
-  declare createdAt: Date;
-  declare updatedAt: Date;
+  declare currentLocation:  Point | null;
+  declare createdAt: CreationOptional<Date>;
+  declare updatedAt: CreationOptional<Date>;
+
+  declare getEarnings: HasManyGetAssociationsMixin<Earning>;
+  declare addEarning: HasManyAddAssociationMixin<Earning, string>;
+  declare addEarnings: HasManyAddAssociationsMixin<Earning, string>;
+  declare setEarnings: HasManySetAssociationsMixin<Earning, string>;
+  declare removeEarning: HasManyRemoveAssociationMixin<Earning, string>;
+  declare removeEarnings: HasManyRemoveAssociationsMixin<Earning, string>;
+  declare hasEarning: HasManyHasAssociationMixin<Earning, string>;
+  declare hasEarnings: HasManyHasAssociationsMixin<Earning, string>;
+  declare countEarnings: HasManyCountAssociationsMixin;
+  declare createEarning: HasManyCreateAssociationMixin<Earning, "courierId">;
+
+  declare getSettings: HasOneGetAssociationMixin<Settings>;
+  declare setSettings: HasOneSetAssociationMixin<Settings, string>;
+  declare createSettings: HasOneCreateAssociationMixin<Settings>;
+
+  declare settings?: NonAttribute<Settings>;
+  declare earnings?: NonAttribute<Earning[]>;
+
+  declare static associations: {
+    settings: Association<Courier, Settings>;
+    earnings: Association<Courier, Earning>;
+  };
 }
 
 Courier.init(
@@ -59,6 +112,9 @@ Courier.init(
     },
     orderSetting: {
       type: DataTypes.ENUM("auto_accept", "auto_reject", "manual"),
+    },
+    currentLocation: {
+      type: DataTypes.GEOGRAPHY,
     },
     createdAt: {
       type: DataTypes.DATE,

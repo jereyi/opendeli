@@ -1,16 +1,42 @@
-import { DataTypes, Model } from "sequelize";
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  HasManyAddAssociationMixin,
+  HasManyGetAssociationsMixin,
+  HasManyRemoveAssociationMixin,
+  HasManySetAssociationsMixin,
+  HasManyAddAssociationsMixin,
+  HasManyRemoveAssociationsMixin,
+  HasManyHasAssociationMixin,
+  HasManyHasAssociationsMixin,
+  HasManyCountAssociationsMixin,
+  HasManyCreateAssociationMixin,
+  HasOneGetAssociationMixin,
+  HasOneSetAssociationMixin,
+  HasOneCreateAssociationMixin,
+  NonAttribute,
+  Association,
+  ForeignKey,
+} from "sequelize";
+import Courier from "./courier.model";
 var db = require("./db"),
   sequelize = db.sequelize;
 
-
-class Earning extends Model {
-  declare id: number;
+class Earning extends Model<
+  InferAttributes<Earning>,
+  InferCreationAttributes<Earning>
+> {
+  declare id: CreationOptional<string>;
+  declare courierId: ForeignKey<Courier["id"]>;
   declare total: number;
   declare pending: number;
   declare received: number;
-  declare payoutMethod: string;
-  declare createdAt: Date;
-  declare updatedAt: Date;
+  declare payoutMethod: string | null;
+  declare createdAt: CreationOptional<Date>;
+  declare updatedAt: CreationOptional<Date>;
 }
 
 Earning.init(

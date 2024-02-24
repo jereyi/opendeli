@@ -1,4 +1,4 @@
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, ForeignKey, Model } from "sequelize";
 import {
   VehicleType,
   OrderPreferences,
@@ -8,13 +8,14 @@ import {
   CuisineTypes,
   DietaryRestrictions,
 } from "../utils/enum.util";
-import { ShiftAvailability, EarningGoals, PayRate, Coordinate } from "../utils/types.util";
+import { ShiftAvailability, EarningGoals, PayRate, Point } from "../utils/types.util";
 var db = require("./db"),
   sequelize = db.sequelize;
 
 class Settings extends Model {
-  declare id: number;
-  declare deliveryPolygon: Coordinate[];
+  declare id: string;
+  declare courierId: ForeignKey<string>;
+  declare deliveryPolygon: Point[];
   declare vehicleType: VehicleType | null;
   declare preferredAreas: string[] | null;
   declare shiftAvailability: ShiftAvailability | null;
@@ -43,7 +44,7 @@ Settings.init(
     // Documentation on usage: https://sequelize.org/api/v6/class/src/data-types.js~geometry
     // TODO: Add PostGis extension: https://postgis.net/documentation/getting_started/
     deliveryPolygon: {
-      type: DataTypes.JSON,
+      type: DataTypes.ARRAY(DataTypes.GEOGRAPHY),
     },
     vehicleType: {
       type: DataTypes.ENUM(

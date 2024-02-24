@@ -2,8 +2,9 @@ import { DataTypes, Model } from "sequelize";
 var db = require("./db"),
   sequelize = db.sequelize;
 
+  // TODO: Fix associaitions
 class Location extends Model {
-  declare id: number;
+  declare id: string;
   declare address: string;
   declare city: string;
   declare state: string;

@@ -1,17 +1,18 @@
 import { DataTypes, Model } from "sequelize";
 import { OrderStatus } from "../utils/enum.util";
-import { Coordinate, Item } from "../utils/types.util";
+import { Point, Item } from "../utils/types.util";
 var db = require("./db"),
   sequelize = db.sequelize;
 
+// TODO: Fix associaitions
 class Order extends Model {
-  declare id: number;
+  declare id: string;
   declare customerName: string;
   declare status: OrderStatus;
   declare customerNotes: string;
   declare courierNotes: string;
-  declare pickupCoords: Coordinate;
-  declare dropOffCoords: Coordinate;
+  declare pickupCoords: Point;
+  declare dropOffCoords: Point;
   declare items: Item[];
   declare undeliverableAction: string;
   declare undeliverableReason: string;
@@ -55,11 +56,11 @@ Order.init(
     },
     // TODO: Handle obfuscated coord
     pickupCoords: {
-      type: DataTypes.JSON,
+      type: DataTypes.GEOGRAPHY,
       allowNull: false,
     },
     dropoffCoords: {
-      type: DataTypes.JSON,
+      type: DataTypes.GEOGRAPHY,
       allowNull: false,
     },
     items: {

@@ -3,8 +3,9 @@ var db = require("./db"),
   sequelize = db.sequelize;
 
 // TODO: Add indices, primary keys, and default
+  // TODO: Fix associaitions
 class Merchant extends Model {
-  declare id: number;
+  declare id: string;
   declare name: string;
   declare logo: string;
   declare phoneNumber: string | null;
