@@ -56,11 +56,11 @@ Order.init(
     },
     // TODO: Handle obfuscated coord
     pickupCoords: {
-      type: DataTypes.GEOGRAPHY,
+      type: DataTypes.GEOMETRY,
       allowNull: false,
     },
     dropoffCoords: {
-      type: DataTypes.GEOGRAPHY,
+      type: DataTypes.GEOMETRY,
       allowNull: false,
     },
     items: {

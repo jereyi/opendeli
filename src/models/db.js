@@ -16,16 +16,15 @@ try {
     .authenticate()
     .then(() => console.log("Connection has been established successfully."));
 
-  sequelize.sy;
 } catch (error) {
   console.error("Unable to connect to the database:", error);
 }
 
-// try {
-//   sequelize.sync().then(() => console.log("Successfully run the function"));
-// } catch (err) {
-//   console.log("Error: ", err);
-// }
+try {
+  sequelize.sync().then(() => console.log("Successfully run the function"));
+} catch (err) {
+  console.log("Error: ", err);
+}
 
 var db = {};
 

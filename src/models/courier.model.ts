@@ -19,20 +19,20 @@ import {
   HasOneCreateAssociationMixin,
   NonAttribute,
   Association,
-  GeographyDataType,
 } from "sequelize";
 import { OrderSetting } from "../utils/enum.util";
 import { Point } from "../utils/types.util";
-import Settings from "./settings.model";
+import Setting from "./setting.model";
 import Earning from "./earning.model";
+import Order from "./order.model";
 var db = require("./db"),
   sequelize = db.sequelize;
 
 // TODO: Add indices, primary keys, and default
 
 class Courier extends Model<
-  InferAttributes<Courier, { omit: "settings" | "earnings" }>,
-  InferCreationAttributes<Courier, { omit: "settings" | "earnings" }>
+  InferAttributes<Courier, { omit: "setting" | "earnings" }>,
+  InferCreationAttributes<Courier, { omit: "setting" | "earnings" }>
 > {
   declare id: CreationOptional<string>;
   declare firstName: string;
@@ -43,7 +43,7 @@ class Courier extends Model<
   declare node_uri: CreationOptional<string>;
   declare isAvailable: CreationOptional<boolean>;
   declare orderSetting: OrderSetting | null;
-  declare currentLocation:  Point | null;
+  declare currentLocation: Point | null;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 
@@ -58,16 +58,17 @@ class Courier extends Model<
   declare countEarnings: HasManyCountAssociationsMixin;
   declare createEarning: HasManyCreateAssociationMixin<Earning, "courierId">;
 
-  declare getSettings: HasOneGetAssociationMixin<Settings>;
-  declare setSettings: HasOneSetAssociationMixin<Settings, string>;
-  declare createSettings: HasOneCreateAssociationMixin<Settings>;
+  declare getSetting: HasOneGetAssociationMixin<Setting>;
+  declare setSetting: HasOneSetAssociationMixin<Setting, string>;
+  declare createSetting: HasOneCreateAssociationMixin<Setting>;
 
-  declare settings?: NonAttribute<Settings>;
+  declare setting?: NonAttribute<Setting>;
   declare earnings?: NonAttribute<Earning[]>;
 
   declare static associations: {
-    settings: Association<Courier, Settings>;
-    earnings: Association<Courier, Earning>;
+    Setting: Association<Courier, Setting>;
+    Earnings: Association<Courier, Earning>;
+    Orders: Association<Courier, Order>;
   };
 }
 
@@ -114,7 +115,7 @@ Courier.init(
       type: DataTypes.ENUM("auto_accept", "auto_reject", "manual"),
     },
     currentLocation: {
-      type: DataTypes.GEOGRAPHY,
+      type: DataTypes.GEOMETRY,
     },
     createdAt: {
       type: DataTypes.DATE,

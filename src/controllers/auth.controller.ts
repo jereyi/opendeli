@@ -1,7 +1,11 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import Courier from "../models/courier.model";
-import { LoginReqBody, PasswordResetReqBody, SignupReqBody } from "../reqBodies/auth";
+import {
+  LoginReqBody,
+  PasswordResetReqBody,
+  SignupReqBody,
+} from "../reqBodies/auth";
 import jwt from "jsonwebtoken";
 
 export async function signup(
@@ -23,11 +27,9 @@ export async function signup(
         phoneNumber,
       },
     });
-
-    // Create corresponding settings object
-    await courier.createSettings();
-
     if (created) {
+      // Create corresponding settings object
+      await courier.createSetting();
       res.status(201).json({
         message: "Courier registered successfully",
       });
@@ -52,9 +54,7 @@ export async function login(req: Request<{}, {}, LoginReqBody>, res: Response) {
     });
     if (!courier) {
       console.error("signup: Authentication failed (Courier does not exist)");
-      return res
-        .status(401)
-        .json({ error: "Authentication failed" });
+      return res.status(401).json({ error: "Authentication failed" });
     }
     const passwordMatch = await bcrypt.compare(password, courier.password);
     if (!passwordMatch) {
@@ -98,13 +98,16 @@ export async function passwordReset(
       console.error("signup: Authentication failed (Password does not match)");
       return res.status(401).json({ error: "Authentication failed" });
     }
-   
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    Courier.update({ password: hashedPassword }, {
-      where: {
-        email
+    Courier.update(
+      { password: hashedPassword },
+      {
+        where: {
+          email,
+        },
       }
-    });
+    );
 
     res.status(200).json({ message: "Password reset successfully" });
   } catch (error) {
