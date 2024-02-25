@@ -12,7 +12,7 @@ import {
   getCourierOrderSetting,
   updateCourierOrderSetting,
   getCourierCurrentLocation,
-  updateCourierCurrentLocation
+  updateCourierCurrentLocation,
 } from "../controllers/couriers.controller";
 import { verifyToken } from "../middlewares/auth.middleware";
 
@@ -31,9 +31,11 @@ router.patch("/:id/availability", verifyToken, updateCourierAvailability);
 router.get("/:id/order-setting", verifyToken, getCourierOrderSetting);
 router.patch("/:id/order-setting", verifyToken, updateCourierOrderSetting);
 
-router.get("/:id/current-location",verifyToken, getCourierCurrentLocation)
-router.patch("/:id/current-location", verifyToken, updateCourierCurrentLocation);
-
-
+router.get("/:id/current-location", verifyToken, getCourierCurrentLocation);
+router.patch(
+  "/:id/current-location",
+  verifyToken,
+  updateCourierCurrentLocation
+);
 
 export default router;

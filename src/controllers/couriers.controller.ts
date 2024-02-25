@@ -5,24 +5,50 @@ import {
   ProfileReqBody,
   SettingsReqBody,
 } from "../reqBodies/courier";
-import Settings from "../models/settings.model";
+import Setting from "../models/setting.model";
 import { OrderSetting } from "../utils/enum.util";
-import { Point } from "../utils/types.util";
+import { Point } from "geojson";
+import { QueryTypes } from "sequelize";
+var db = require("../models/db"),
+  sequelize = db.sequelize;
 
-// TODO: Add filtering by location and shift
+// TODO: Test use delivery polygon flag in Postman
 export async function getCouriers(
   req: Request<{}, {}, CouriersReqBody>,
   res: Response
 ) {
   try {
-    const { isAvailable, shiftAt, location } = req.body;
-    const filters: any = {};
+    const { checkIsAvailable, sortByDistance, useDeliveryPolygon, location } =
+      req.body;
 
-    if (isAvailable != undefined) filters.isAvailable = isAvailable;
+    let baseQuery;
+    let replacements;
+    if (location) {
+      baseQuery = `SELECT *, ST_Distance(ST_SetSRID(ST_MakePoint(:latitude, :longitude), 4326), "currentLocation") AS distance FROM "couriers"`;
+      const [latitude, longitude] = location.coordinates;
+      replacements = { latitude, longitude };
+    } else {
+      baseQuery = `SELECT * FROM "couriers"`;
+    }
+    const deliveryPolygonQuery = `ST_Intersects(ST_SetSRID(ST_MakePoint(:latitude, :longitude), 4326), "deliveryPolygon")`;
+    const isAvailableQuery = '"isAvailable"';
+    const sortByDistanceQuery = "ORDER BY distance ASC";
 
-    const couriers = await Courier.findAll({
-      where: filters,
-      include: Settings,
+    if (useDeliveryPolygon) {
+      baseQuery += " WHERE " + deliveryPolygonQuery;
+    }
+    if (checkIsAvailable) {
+      baseQuery +=
+        (useDeliveryPolygon ? " AND " : " WHERE ") + isAvailableQuery;
+    }
+    if (sortByDistance) {
+      baseQuery += " " + sortByDistanceQuery;
+    }
+
+    const couriers = await sequelize.query(baseQuery, {
+      replacements,
+      model: Courier,
+      type: QueryTypes.SELECT,
     });
 
     res.status(200).json({ couriers });
@@ -35,7 +61,7 @@ export async function getCouriers(
 export async function getCourier(req: Request<{ id: string }>, res: Response) {
   try {
     const id = req.params.id;
-    const courier = await Courier.findByPk(id, { include: Settings });
+    const courier = await Courier.findByPk(id);
 
     if (courier) {
       res.status(200).json({ courier });
@@ -107,19 +133,20 @@ export async function updateCourierProfile(
 export async function getCourierFullSettings(req: Request, res: Response) {
   try {
     const id = req.params.id;
-    const courier = await Courier.findByPk(id, { include: Settings });
+    const courier = await Courier.findByPk(id, { include: Setting });
 
     if (courier) {
-      res.status(200).json({ settings: courier.settings });
+      res.status(200).json({ setting: courier.Setting});
     } else {
       res.status(404).json({ message: "Courier not found" });
     }
   } catch (error) {
     console.error("getCourierFullSettings:", error);
-    res.status(500).json({ error: "Error fetching courier settings" });
+    res.status(500).json({ error: "Error fetching courier setting" });
   }
 }
 
+// TODO: Test this method in Postman
 export async function updateCourierFullSettings(
   req: Request<{ id: string }, {}, SettingsReqBody>,
   res: Response
@@ -142,39 +169,37 @@ export async function updateCourierFullSettings(
       payRate,
     } = req.body;
     const courier = await Courier.findByPk(id);
-    const settings: any = {};
+    const setting: any = {};
     if (courier) {
       // NOTE: You may have to manipulate these object to make them fit in DB
-      if (deliveryPolygon) settings.deliveryPolygon = deliveryPolygon;
-      if (vehicleType) settings.vehicleType = vehicleType;
-      if (preferredAreas) settings.preferredAreas = preferredAreas;
-      if (shiftAvailability) settings.shiftAvailability = shiftAvailability;
-      if (orderPreferences) settings.orderPreferences = orderPreferences;
-      if (foodPreferences) settings.foodPreferences = foodPreferences;
-      if (earningGoals) settings.earningGoals = earningGoals;
-      if (deliverySpeed) settings.deliverySpeed = deliverySpeed;
-      if (restaurantTypes) settings.restaurantTypes = restaurantTypes;
-      if (cuisineType) settings.cuisineType = cuisineType;
+      if (deliveryPolygon) setting.deliveryPolygon = deliveryPolygon;
+      if (vehicleType) setting.vehicleType = vehicleType;
+      if (preferredAreas) setting.preferredAreas = preferredAreas;
+      if (shiftAvailability) setting.shiftAvailability = shiftAvailability;
+      if (orderPreferences) setting.orderPreferences = orderPreferences;
+      if (foodPreferences) setting.foodPreferences = foodPreferences;
+      if (earningGoals) setting.earningGoals = earningGoals;
+      if (deliverySpeed) setting.deliverySpeed = deliverySpeed;
+      if (restaurantTypes) setting.restaurantTypes = restaurantTypes;
+      if (cuisineType) setting.cuisineType = cuisineType;
       if (preferredRestaurantPartners)
-        settings.preferredRestaurantPartners = preferredRestaurantPartners;
+        setting.preferredRestaurantPartners = preferredRestaurantPartners;
       if (dietaryRestrictions)
-        settings.dietaryRestrictions = dietaryRestrictions;
-      if (payRate) settings.payRate = payRate;
+        setting.dietaryRestrictions = dietaryRestrictions;
+      if (payRate) setting.payRate = payRate;
 
-      await Settings.update(settings, {
+      await Setting.update(setting, {
         where: {
           courierId: id,
         },
       });
-      res
-        .status(200)
-        .json({ message: "Courier settings updated successfully" });
+      res.status(200).json({ message: "Courier setting updated successfully" });
     } else {
       res.status(404).json({ message: "Courier not found" });
     }
   } catch (error) {
     console.error("updateCourierFullSettings:", error);
-    res.status(500).json({ error: "Error fetching courier settings" });
+    res.status(500).json({ error: "Error fetching courier setting" });
   }
 }
 
@@ -266,7 +291,7 @@ export async function updateCourierOrderSetting(
     );
 
     if (affectedRows > 0) {
-      res.status(200).json({ message: "Order settings updated successfully" });
+      res.status(200).json({ message: "Order setting updated successfully" });
     } else {
       res.status(404).json({ message: "Courier not found" });
     }
@@ -297,6 +322,7 @@ export async function getCourierCurrentLocation(
   }
 }
 
+// NOTE: Current location must be specified in geoJson format (https://geojson.org/geojson-spec.html)
 export async function updateCourierCurrentLocation(
   req: Request<{ id: string }, {}, { currentLocation: Point }>,
   res: Response
@@ -304,6 +330,7 @@ export async function updateCourierCurrentLocation(
   try {
     const id = req.params.id;
     const { currentLocation } = req.body;
+
 
     const [affectedRows] = await Courier.update(
       { currentLocation },
@@ -315,7 +342,9 @@ export async function updateCourierCurrentLocation(
     );
 
     if (affectedRows > 0) {
-      res.status(200).json({ message: "Current location updated successfully" });
+      res
+        .status(200)
+        .json({ message: "Current location updated successfully" });
     } else {
       res.status(404).json({ message: "Courier not found" });
     }

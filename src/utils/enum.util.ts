@@ -1,76 +1,76 @@
 // COURIER MODEL
 export enum OrderSetting {
-  AutoAccept,
-  AutoReject,
-  Manual,
+  "auto_accept",
+  "auto_reject",
+  "manual",
 }
 
 // SETTINGS MODEL
 export enum VehicleType {
-  Bicycle,
-  Motorcycle,
-  Car,
-  Scooter,
-  OnFoot,
+  "bicycle",
+  "motorcycle",
+  "car",
+  "scooter",
+  "on_foot",
 }
 export enum RestaurantTypes {
-  Local,
-  Chain,
-  BlackOwned,
-  WomanOwned,
-  Franchise,
-  Upscale,
-  FastCasual,
-  FoodTrucks,
-  VeganVegetarian,
+  "local",
+  "chain",
+  "black_owned",
+  "woman_owned",
+  "franchise",
+  'upscale',
+  "fast_casual",
+  "food_trucks",
+  "vegan_vegetarian",
 }
 export enum OrderPreferences {
-  SmallOrders,
-  MediumOrders,
-  LargeOrders,
+  "small_orders",
+  "medium_orders",
+  "large_orders",
 }
 export enum FoodPreferences {
-  Hot,
-  Cold,
-  Fragile,
+  "hot",
+  "cold",
+  "fragile",
 }
 
 export enum DeliverySpeed {
-  Regular,
-  Rush,
+  "regular",
+  "rush",
 }
 
 export enum CuisineTypes {
-  American,
-  Italian,
-  Mexican,
-  Chinese,
-  Japanese,
-  Indian,
-  Mediterranean,
-  Thai,
-  French,
-  Korean,
-  Vietnamese,
-  MiddleEastern,
-  African,
-  Caribbean,
+  "american",
+  "italian",
+  "mexican",
+  "chinese",
+  "japanese",
+  "indian",
+  "mediterranean",
+  "thai",
+  "french",
+  "korean",
+  "vietnamese",
+  "middle_eastern",
+  "african",
+  "caribbean",
 }
 
 export enum DietaryRestrictions {
-  Vegan,
-  Vegetarian,
-  Halal,
-  Kosher,
-  Organic,
-  AlcoholFree,
+  "vegan",
+  "vegetarian",
+  "halal",
+  "kosher",
+  "organic",
+  "alcohol_free",
 }
 
 // ORDER MODEL
 export enum OrderStatus {
-  Created,
-  Dispatched,
-  PickedUp,
-  DroppedOff,
-  Canceled,
+  "created",
+  "dispatched",
+  "picked_up",
+  "dropped_off",
+  "canceled",
 }

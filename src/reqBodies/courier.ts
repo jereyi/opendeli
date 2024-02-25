@@ -1,9 +1,11 @@
 import { VehicleType, OrderPreferences, FoodPreferences, DeliverySpeed, RestaurantTypes, CuisineTypes, DietaryRestrictions } from "../utils/enum.util";
-import { Point, ShiftAvailability, EarningGoals, PayRate } from "../utils/types.util";
+import { ShiftAvailability, EarningGoals, PayRate } from "../utils/types.util";
+import { Point, Polygon } from "geojson";
 
 export type CouriersReqBody = {
-    isAvailable?: boolean;
-    shiftAt?: Date;
+    checkIsAvailable?: boolean;
+    sortByDistance?: boolean;
+    useDeliveryPolygon?: boolean;
     location?: Point;
 }
 export type ProfileReqBody = {
@@ -14,7 +16,7 @@ export type ProfileReqBody = {
 };
 
 export type SettingsReqBody = {
-  deliveryPolygon: Point[];
+  deliveryPolygon: Polygon | null;
   vehicleType: VehicleType | null;
   preferredAreas: string[] | null;
   shiftAvailability: ShiftAvailability | null;
@@ -27,6 +29,4 @@ export type SettingsReqBody = {
   preferredRestaurantPartners: string[] | null;
   dietaryRestrictions: DietaryRestrictions[] | null;
   payRate: PayRate | null;
-  createdAt: Date;
-  updatedAt: Date;
 };

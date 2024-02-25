@@ -32,8 +32,3 @@ export type Item = {
   weight: number;
   keepUpright: boolean;
 };
-
-export type Point = {
-  type: "Point";
-  coordinates: [number, number];
-}

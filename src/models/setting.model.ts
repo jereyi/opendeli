@@ -19,8 +19,8 @@ import {
   ShiftAvailability,
   EarningGoals,
   PayRate,
-  Point,
 } from "../utils/types.util";
+import { Polygon } from "geojson";
 var db = require("./db"),
   sequelize = db.sequelize;
 
@@ -30,7 +30,7 @@ class Setting extends Model<
 > {
   declare id: CreationOptional<string>;
   declare courierId: ForeignKey<string>;
-  declare deliveryPolygon: Point[] | null;
+  declare deliveryPolygon: Polygon | null;
   declare vehicleType: VehicleType | null;
   declare preferredAreas: string[] | null;
   declare shiftAvailability: ShiftAvailability | null;

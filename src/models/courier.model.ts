@@ -21,7 +21,7 @@ import {
   Association,
 } from "sequelize";
 import { OrderSetting } from "../utils/enum.util";
-import { Point } from "../utils/types.util";
+import { Point } from "geojson";
 import Setting from "./setting.model";
 import Earning from "./earning.model";
 import Order from "./order.model";
@@ -31,8 +31,8 @@ var db = require("./db"),
 // TODO: Add indices, primary keys, and default
 
 class Courier extends Model<
-  InferAttributes<Courier, { omit: "setting" | "earnings" }>,
-  InferCreationAttributes<Courier, { omit: "setting" | "earnings" }>
+  InferAttributes<Courier, { omit: "Setting" | "Earnings" }>,
+  InferCreationAttributes<Courier, { omit: "Setting" | "Earnings" }>
 > {
   declare id: CreationOptional<string>;
   declare firstName: string;
@@ -43,7 +43,7 @@ class Courier extends Model<
   declare node_uri: CreationOptional<string>;
   declare isAvailable: CreationOptional<boolean>;
   declare orderSetting: OrderSetting | null;
-  declare currentLocation: Point | null;
+  declare currentLocation:  Point | null;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 
@@ -62,8 +62,8 @@ class Courier extends Model<
   declare setSetting: HasOneSetAssociationMixin<Setting, string>;
   declare createSetting: HasOneCreateAssociationMixin<Setting>;
 
-  declare setting?: NonAttribute<Setting>;
-  declare earnings?: NonAttribute<Earning[]>;
+  declare Setting?: NonAttribute<Setting>;
+  declare Earnings?: NonAttribute<Earning[]>;
 
   declare static associations: {
     Setting: Association<Courier, Setting>;

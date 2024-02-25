@@ -1,6 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { OrderStatus } from "../utils/enum.util";
-import { Point, Item } from "../utils/types.util";
+import { Point } from "geojson";
+import { Item } from "../utils/types.util";
 var db = require("./db"),
   sequelize = db.sequelize;
 
