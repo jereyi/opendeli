@@ -1,29 +1,36 @@
-import { DataTypes, Model } from "sequelize";
+import { CreationOptional, DataTypes, ForeignKey, InferAttributes, InferCreationAttributes, Model } from "sequelize";
 import { OrderStatus } from "../utils/enum.util";
 import { Point } from "geojson";
 import { Item } from "../utils/types.util";
+import Merchant from "./merchant.model";
+import Courier from "./courier.model";
 var db = require("./db"),
   sequelize = db.sequelize;
 
-// TODO: Fix associaitions
-class Order extends Model {
-  declare id: string;
+class Order extends Model<
+  InferAttributes<Order>,
+  InferCreationAttributes<Order>
+> {
+  declare id: CreationOptional<string>;
+  declare CourierId: ForeignKey<Courier["id"]>;
+  declare MerchantId: ForeignKey<Merchant["id"]>;
   declare customerName: string;
   declare status: OrderStatus;
-  declare customerNotes: string;
-  declare courierNotes: string;
+  declare customerNotes: string | null;
+  declare courierNotes: string | null;;
   declare pickupCoords: Point;
-  declare dropOffCoords: Point;
+  declare dropoffCoords: Point;
   declare items: Item[];
-  declare undeliverableAction: string;
-  declare undeliverableReason: string;
+  declare undeliverableAction: string | null;
+  declare undeliverableReason: string | null;
   declare currencyCode: string;
   declare grossRevenue: number;
   declare fees: number;
   declare pay: number;
-  declare deliveryTime: Date;
-  declare createdAt: Date;
-  declare updatedAt: Date;
+  declare tips: CreationOptional<number>;
+  declare deliveryTime: CreationOptional<Date>;
+  declare createdAt: CreationOptional<Date>;
+  declare updatedAt: CreationOptional<Date>;
 }
 
 Order.init(
@@ -48,6 +55,7 @@ Order.init(
         "canceled"
       ),
       allowNull: false,
+      defaultValue: "created",
     },
     customerNotes: {
       type: DataTypes.STRING,
@@ -66,6 +74,8 @@ Order.init(
     },
     items: {
       type: DataTypes.ARRAY(DataTypes.JSON),
+      defaultValue: [],
+      allowNull: false,
     },
     undeliverableAction: {
       type: DataTypes.STRING,
@@ -76,24 +86,31 @@ Order.init(
     // ISO 4217 Currency Code (e.g. U.S. Dollar -> USD)
     currencyCode: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
     // Total amount earned for this order (pay + fees)
     grossRevenue: {
       type: DataTypes.INTEGER,
+      allowNull: false,
     },
     // Fees associated with the delivery of this order
     fees: {
       type: DataTypes.INTEGER,
+      allowNull: false,
     },
     // Driver's compensation for this order (before tips)
     pay: {
       type: DataTypes.INTEGER,
+      allowNull: false,
     },
     tips: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
     },
     deliveryTime: {
       type: DataTypes.DATE,
+      allowNull: false,
       defaultValue: DataTypes.NOW,
     },
     createdAt: {

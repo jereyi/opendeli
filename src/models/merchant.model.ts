@@ -1,16 +1,82 @@
-import { DataTypes, Model } from "sequelize";
+import {
+  Association,
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyAddAssociationsMixin,
+  BelongsToManyCountAssociationsMixin,
+  BelongsToManyCreateAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
+  BelongsToManyHasAssociationMixin,
+  BelongsToManyHasAssociationsMixin,
+  BelongsToManyRemoveAssociationMixin,
+  BelongsToManyRemoveAssociationsMixin,
+  BelongsToManySetAssociationsMixin,
+  DataTypes,
+  HasManyAddAssociationMixin,
+  HasManyAddAssociationsMixin,
+  HasManyCountAssociationsMixin,
+  HasManyCreateAssociationMixin,
+  HasManyGetAssociationsMixin,
+  HasManyHasAssociationMixin,
+  HasManyHasAssociationsMixin,
+  HasManyRemoveAssociationMixin,
+  HasManyRemoveAssociationsMixin,
+  HasManySetAssociationsMixin,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  NonAttribute,
+  CreationOptional,
+} from "sequelize";
+import Location from "./location.model";
+import Comment from "./comment.model";
 var db = require("./db"),
   sequelize = db.sequelize;
 
 // TODO: Add indices, primary keys, and default
-  // TODO: Fix associaitions
-class Merchant extends Model {
-  declare id: string;
+// TODO: Fix associaitions
+class Merchant extends Model<
+  InferAttributes<Merchant, { omit: "Comments" | "Locations" }>,
+  InferCreationAttributes<Merchant, { omit: "Comments" | "Locations" }>
+> {
+  declare id: CreationOptional<string>;
   declare name: string;
-  declare logo: string;
+  declare logo: string | null;
   declare phoneNumber: string | null;
-  declare createdAt: Date;
-  declare updatedAt: Date;
+  declare createdAt: CreationOptional<Date>;
+  declare updatedAt: CreationOptional<Date>;
+
+  declare getComments: HasManyGetAssociationsMixin<Comment>;
+  declare addComment: HasManyAddAssociationMixin<Comment, string>;
+  declare addComments: HasManyAddAssociationsMixin<Comment, string>;
+  declare setComments: HasManySetAssociationsMixin<Comment, string>;
+  declare removeComment: HasManyRemoveAssociationMixin<Comment, string>;
+  declare removeComments: HasManyRemoveAssociationsMixin<Comment, string>;
+  declare hasComment: HasManyHasAssociationMixin<Comment, string>;
+  declare hasComments: HasManyHasAssociationsMixin<Comment, string>;
+  declare countComments: HasManyCountAssociationsMixin;
+  declare createComment: HasManyCreateAssociationMixin<Comment, "MerchantId">;
+
+  declare getLocations: BelongsToManyGetAssociationsMixin<Location>;
+  declare addLocation: BelongsToManyAddAssociationMixin<Location, string>;
+  declare addLocations: BelongsToManyAddAssociationsMixin<Location, string>;
+  declare setLocations: BelongsToManySetAssociationsMixin<Location, string>;
+  declare removeLocation: BelongsToManyRemoveAssociationMixin<Location, string>;
+  declare removeLocations: BelongsToManyRemoveAssociationsMixin<
+    Location,
+    string
+  >;
+  declare hasLocation: BelongsToManyHasAssociationMixin<Location, string>;
+  declare hasLocations: BelongsToManyHasAssociationsMixin<Location, string>;
+  declare countLocations: BelongsToManyCountAssociationsMixin;
+  declare createLocation: BelongsToManyCreateAssociationMixin<Location>;
+
+  declare Comments?: NonAttribute<Comment[]>;
+  declare Locations?: NonAttribute<Location[]>;
+
+  declare static associations: {
+    Comments: Association<Location, Comment>;
+    Locations: Association<Location, Location>;
+  };
 }
 
 Merchant.init(
@@ -28,7 +94,6 @@ Merchant.init(
     },
     logo: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     phoneNumber: {
       type: DataTypes.STRING,

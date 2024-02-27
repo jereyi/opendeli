@@ -29,7 +29,7 @@ class Setting extends Model<
   InferCreationAttributes<Setting>
 > {
   declare id: CreationOptional<string>;
-  declare courierId: ForeignKey<string>;
+  declare CourierId: ForeignKey<string>;
   declare deliveryPolygon: Polygon | null;
   declare vehicleType: VehicleType | null;
   declare preferredAreas: string[] | null;

@@ -56,7 +56,7 @@ class Courier extends Model<
   declare hasEarning: HasManyHasAssociationMixin<Earning, string>;
   declare hasEarnings: HasManyHasAssociationsMixin<Earning, string>;
   declare countEarnings: HasManyCountAssociationsMixin;
-  declare createEarning: HasManyCreateAssociationMixin<Earning, "courierId">;
+  declare createEarning: HasManyCreateAssociationMixin<Earning, "CourierId">;
 
   declare getSetting: HasOneGetAssociationMixin<Setting>;
   declare setSetting: HasOneSetAssociationMixin<Setting, string>;

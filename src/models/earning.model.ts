@@ -30,7 +30,7 @@ class Earning extends Model<
   InferCreationAttributes<Earning>
 > {
   declare id: CreationOptional<string>;
-  declare courierId: ForeignKey<Courier["id"]>;
+  declare CourierId: ForeignKey<Courier["id"]>;
   declare total: number;
   declare pending: number;
   declare received: number;
