@@ -16,17 +16,17 @@ export type ProfileReqBody = {
 };
 
 export type SettingsReqBody = {
-  deliveryPolygon: Polygon | null;
-  vehicleType: VehicleType | null;
-  preferredAreas: string[] | null;
-  shiftAvailability: ShiftAvailability | null;
-  orderPreferences: OrderPreferences[] | null;
-  foodPreferences: FoodPreferences[] | null;
-  earningGoals: EarningGoals | null;
-  deliverySpeed: DeliverySpeed | null;
-  restaurantTypes: RestaurantTypes[] | null;
-  cuisineType: CuisineTypes[] | null;
-  preferredRestaurantPartners: string[] | null;
-  dietaryRestrictions: DietaryRestrictions[] | null;
-  payRate: PayRate | null;
+  deliveryPolygon?: Polygon;
+  vehicleType?: VehicleType;
+  preferredAreas?: string[];
+  shiftAvailability?: ShiftAvailability;
+  orderPreferences?: OrderPreferences[];
+  foodPreferences?: FoodPreferences[];
+  earningGoals?: EarningGoals;
+  deliverySpeed?: DeliverySpeed;
+  restaurantTypes?: RestaurantTypes[];
+  cuisineType?: CuisineTypes[];
+  preferredRestaurantPartners?: string[];
+  dietaryRestrictions?: DietaryRestrictions[];
+  payRate?: PayRate;
 };

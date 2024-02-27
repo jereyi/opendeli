@@ -4,7 +4,7 @@ import {
   CouriersReqBody,
   ProfileReqBody,
   SettingsReqBody,
-} from "../reqBodies/courier";
+} from "../reqBodies/couriers";
 import Setting from "../models/setting.model";
 import { OrderSetting } from "../utils/enum.util";
 import { Point } from "geojson";
@@ -73,31 +73,31 @@ export async function getCourier(req: Request<{ id: string }>, res: Response) {
     res.status(500).json({ error: "Error fetching courier" });
   }
 }
+// QQQ: Do we need these routes?
+// export async function getCourierProfile(req: Request, res: Response) {
+//   try {
+//     const id = req.params.id;
+//     const courier = await Courier.findByPk(id, {
+//       attributes: ["firstName", "lastName", "email", "phoneNumber"],
+//     });
 
-export async function getCourierProfile(req: Request, res: Response) {
-  try {
-    const id = req.params.id;
-    const courier = await Courier.findByPk(id, {
-      attributes: ["firstName", "lastName", "email", "phoneNumber"],
-    });
-
-    if (courier) {
-      res.status(200).json({
-        profile: {
-          firstName: courier.firstName,
-          lastName: courier.lastName,
-          email: courier.email,
-          phoneNumber: courier.phoneNumber,
-        },
-      });
-    } else {
-      res.status(404).json({ message: "Courier not found" });
-    }
-  } catch (error) {
-    console.error("getCourierProfile:", error);
-    res.status(500).json({ error: "Error fetching courier" });
-  }
-}
+//     if (courier) {
+//       res.status(200).json({
+//         profile: {
+//           firstName: courier.firstName,
+//           lastName: courier.lastName,
+//           email: courier.email,
+//           phoneNumber: courier.phoneNumber,
+//         },
+//       });
+//     } else {
+//       res.status(404).json({ message: "Courier not found" });
+//     }
+//   } catch (error) {
+//     console.error("getCourierProfile:", error);
+//     res.status(500).json({ error: "Error fetching courier" });
+//   }
+// }
 
 export async function updateCourierProfile(
   req: Request<{ id: string }, {}, ProfileReqBody>,
@@ -190,7 +190,7 @@ export async function updateCourierFullSettings(
 
       await Setting.update(setting, {
         where: {
-          courierId: id,
+          CourierId: id,
         },
       });
       res.status(200).json({ message: "Courier setting updated successfully" });
@@ -203,26 +203,26 @@ export async function updateCourierFullSettings(
   }
 }
 
-export async function getCourierAvailability(
-  req: Request<{ id: string }>,
-  res: Response
-) {
-  try {
-    const id = req.params.id;
-    const courier = await Courier.findByPk(id, {
-      attributes: ["isAvailable"],
-    });
+// export async function getCourierAvailability(
+//   req: Request<{ id: string }>,
+//   res: Response
+// ) {
+//   try {
+//     const id = req.params.id;
+//     const courier = await Courier.findByPk(id, {
+//       attributes: ["isAvailable"],
+//     });
 
-    if (courier) {
-      res.status(200).json({ isAvailable: courier.isAvailable });
-    } else {
-      res.status(404).json({ message: "Courier not found" });
-    }
-  } catch (error) {
-    console.error("getCourierAvailability:", error);
-    res.status(500).json({ error: "Error fetching courier availability" });
-  }
-}
+//     if (courier) {
+//       res.status(200).json({ isAvailable: courier.isAvailable });
+//     } else {
+//       res.status(404).json({ message: "Courier not found" });
+//     }
+//   } catch (error) {
+//     console.error("getCourierAvailability:", error);
+//     res.status(500).json({ error: "Error fetching courier availability" });
+//   }
+// }
 
 export async function updateCourierAvailability(
   req: Request<{ id: string }, {}, { isAvailable: boolean }>,
@@ -252,26 +252,26 @@ export async function updateCourierAvailability(
   }
 }
 
-export async function getCourierOrderSetting(
-  req: Request<{ id: string }>,
-  res: Response
-) {
-  try {
-    const id = req.params.id;
-    const courier = await Courier.findByPk(id, {
-      attributes: ["orderSetting"],
-    });
+// export async function getCourierOrderSetting(
+//   req: Request<{ id: string }>,
+//   res: Response
+// ) {
+//   try {
+//     const id = req.params.id;
+//     const courier = await Courier.findByPk(id, {
+//       attributes: ["orderSetting"],
+//     });
 
-    if (courier) {
-      res.status(200).json({ orderSetting: courier.orderSetting });
-    } else {
-      res.status(404).json({ message: "Courier not found" });
-    }
-  } catch (error) {
-    console.error("getCourierOrderSetting:", error);
-    res.status(500).json({ error: "Error fetching courier order setting" });
-  }
-}
+//     if (courier) {
+//       res.status(200).json({ orderSetting: courier.orderSetting });
+//     } else {
+//       res.status(404).json({ message: "Courier not found" });
+//     }
+//   } catch (error) {
+//     console.error("getCourierOrderSetting:", error);
+//     res.status(500).json({ error: "Error fetching courier order setting" });
+//   }
+// }
 
 export async function updateCourierOrderSetting(
   req: Request<{ id: string }, {}, { orderSetting: OrderSetting }>,
@@ -301,26 +301,26 @@ export async function updateCourierOrderSetting(
   }
 }
 
-export async function getCourierCurrentLocation(
-  req: Request<{ id: string }>,
-  res: Response
-) {
-  try {
-    const id = req.params.id;
-    const courier = await Courier.findByPk(id, {
-      attributes: ["currentLocation"],
-    });
+// export async function getCourierCurrentLocation(
+//   req: Request<{ id: string }>,
+//   res: Response
+// ) {
+//   try {
+//     const id = req.params.id;
+//     const courier = await Courier.findByPk(id, {
+//       attributes: ["currentLocation"],
+//     });
 
-    if (courier) {
-      res.status(200).json({ currentLocation: courier.currentLocation });
-    } else {
-      res.status(404).json({ message: "Courier not found" });
-    }
-  } catch (error) {
-    console.error("getCourierCurrentLocation:", error);
-    res.status(500).json({ error: "Error fetching courier location" });
-  }
-}
+//     if (courier) {
+//       res.status(200).json({ currentLocation: courier.currentLocation });
+//     } else {
+//       res.status(404).json({ message: "Courier not found" });
+//     }
+//   } catch (error) {
+//     console.error("getCourierCurrentLocation:", error);
+//     res.status(500).json({ error: "Error fetching courier location" });
+//   }
+// }
 
 // NOTE: Current location must be specified in geoJson format (https://geojson.org/geojson-spec.html)
 export async function updateCourierCurrentLocation(

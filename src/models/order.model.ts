@@ -12,12 +12,12 @@ class Order extends Model<
   InferCreationAttributes<Order>
 > {
   declare id: CreationOptional<string>;
-  declare CourierId: ForeignKey<Courier["id"]>;
-  declare MerchantId: ForeignKey<Merchant["id"]>;
+  declare CourierId: ForeignKey<Courier["id"]> | null;
+  declare MerchantId: ForeignKey<Merchant["id"]> | null;
   declare customerName: string;
   declare status: OrderStatus;
-  declare customerNotes: string | null;
-  declare courierNotes: string | null;;
+  declare customerNotes: string[];
+  declare courierNotes: string[];;
   declare pickupCoords: Point;
   declare dropoffCoords: Point;
   declare items: Item[];
@@ -58,10 +58,14 @@ Order.init(
       defaultValue: "created",
     },
     customerNotes: {
-      type: DataTypes.STRING,
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
+      allowNull: false,
     },
     courierNotes: {
-      type: DataTypes.STRING,
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
+      allowNull: false,
     },
     // TODO: Handle obfuscated coord
     pickupCoords: {
