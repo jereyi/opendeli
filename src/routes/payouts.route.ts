@@ -7,7 +7,8 @@ import {
 } from "../controllers/payouts.controller";
 import { verifyToken } from "../middlewares/auth.middleware";
 
-router.post("/", verifyToken, requestPayout);
+// https://github.com/stripe/stripe-connect-rocketrides/blob/master/server/routes/pilots/stripe.js
+router.post("/:id", verifyToken, requestPayout);
 
 router.get("/stripe/connect/initiate", verifyToken, connectInitiate);
 

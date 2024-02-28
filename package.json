@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/jereyi/opendeli#readme",
   "dependencies": {
+    "@stripe/stripe-js": "^3.0.6",
     "@types/geojson": "^7946.0.14",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
@@ -32,7 +33,8 @@
     "pg-hstore": "^2.3.4",
     "pino-colada": "^2.2.2",
     "sequelize": "^6.37.0",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "stripe": "^14.18.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

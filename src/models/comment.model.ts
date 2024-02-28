@@ -17,6 +17,9 @@ import {
   NonAttribute,
   Association,
   ForeignKey,
+  BelongsToGetAssociationMixin,
+  BelongsToSetAssociationMixin,
+  BelongsToCreateAssociationMixin,
 } from "sequelize";
 import Location from "./location.model";
 import Merchant from "./merchant.model";
@@ -47,6 +50,18 @@ class Comment extends Model<
   declare hasReplys: HasManyHasAssociationsMixin<Comment, string>;
   declare countReplys: HasManyCountAssociationsMixin;
   declare createReply: HasManyCreateAssociationMixin<Comment, "CommentId">;
+
+  declare getMerchant: BelongsToGetAssociationMixin<Merchant>;
+  declare setMerchant: BelongsToSetAssociationMixin<Merchant, string>;
+  declare createMerchant: BelongsToCreateAssociationMixin<Merchant>;
+
+  declare getLocation: BelongsToGetAssociationMixin<Location>;
+  declare setLocation: BelongsToSetAssociationMixin<Location, string>;
+  declare createLocation: BelongsToCreateAssociationMixin<Location>;
+
+  declare getComment: BelongsToGetAssociationMixin<Comment>;
+  declare setComment: BelongsToSetAssociationMixin<Comment, string>;
+  declare createComment: BelongsToCreateAssociationMixin<Comment>;
 
   declare Replys?: NonAttribute<Comment[]>;
 

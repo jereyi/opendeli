@@ -1,8 +1,13 @@
 import { Router } from 'express';
 const router = Router();
-import { getEarnings } from '../controllers/earnings.controller';
+import {
+    getEarnings,
+    getEarning
+} from '../controllers/earnings.controller';
 import { verifyToken } from "../middlewares/auth.middleware";
 
 router.get("/", verifyToken, getEarnings);
+
+router.get("/:id", verifyToken, getEarning);
 
 export default router;

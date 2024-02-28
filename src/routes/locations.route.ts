@@ -1,19 +1,16 @@
 import { Router } from "express";
 const router = Router();
 import {
-  getLocationComments,
-  createLocationComment,
-  updateLocationComment,
-  upvoteLocationComment,
+  getLocations,
+  getLocation,
+  getComments,
 } from "../controllers/locations.controller";
 import { verifyToken } from "../middlewares/auth.middleware";
 
-router.get("/", verifyToken, getLocationComments);
+router.get("/", verifyToken, getLocations);
 
-router.post("/", verifyToken, createLocationComment);
+router.get("/:id", verifyToken, getLocation);
 
-router.patch("/:id", verifyToken, updateLocationComment);
-
-router.patch("/:id", verifyToken, upvoteLocationComment);
+router.post("/:id/comments", verifyToken, getComments)
 
 export default router;

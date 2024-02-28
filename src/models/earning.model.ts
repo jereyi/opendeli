@@ -37,6 +37,10 @@ class Earning extends Model<
   declare payoutMethod: string | null;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
+
+  declare getCourier: HasOneGetAssociationMixin<Courier>;
+  declare setCourier: HasOneSetAssociationMixin<Courier, string>;
+  declare createCourier: HasOneCreateAssociationMixin<Courier>;
 }
 
 Earning.init(
