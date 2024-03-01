@@ -49,3 +49,5 @@ app.use((err: any, req: Request, res: Response, next: any) => {
 app.listen(port, "0.0.0.0", () => {
   console.log(`OpenDeli app listening at http://localhost:${port}`);
 });
+
+export default app;

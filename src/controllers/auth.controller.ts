@@ -12,8 +12,15 @@ export async function signup(
   req: Request<{}, {}, SignupReqBody>,
   res: Response
 ) {
+  const { firstName, lastName, email, password, phoneNumber } = req.body;
+  if (!firstName || !lastName || !email || !password) {
+    res.status(400).json({
+      error:
+        "Courier must have a first name, last name, email address, and password",
+    });
+    return;
+  }
   try {
-    const { firstName, lastName, email, password, phoneNumber } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const [courier, created] = await Courier.findOrCreate({
       where: {
@@ -39,27 +46,30 @@ export async function signup(
       });
     }
   } catch (error) {
-    console.error("signup: Registration failed", error);
     res.status(500).json({ error: "Registration failed" });
   }
 }
 
 export async function login(req: Request<{}, {}, LoginReqBody>, res: Response) {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    res.status(400).json({
+      error: "Must provide email address and password to log in",
+    });
+    return;
+  }
   try {
-    const { email, password } = req.body;
     const courier = await Courier.findOne({
       where: {
         email,
       },
     });
     if (!courier) {
-      console.error("signup: Authentication failed (Courier does not exist)");
-      return res.status(401).json({ error: "Authentication failed" });
+      return res.status(401).json({ error: "Courier does not exist" });
     }
     const passwordMatch = await bcrypt.compare(password, courier.password);
     if (!passwordMatch) {
-      console.error("signup: Authentication failed (Password does not match)");
-      return res.status(401).json({ error: "Authentication failed" });
+      return res.status(401).json({ error: "Password does not match" });
     }
     // TODO: Set up secret key
     const token = jwt.sign(
@@ -71,7 +81,6 @@ export async function login(req: Request<{}, {}, LoginReqBody>, res: Response) {
     );
     res.status(200).json({ token });
   } catch (error) {
-    console.error("signup: Registration failed", error);
     res.status(500).json({ error: "Login failed" });
   }
 }
@@ -80,23 +89,26 @@ export async function passwordReset(
   req: Request<{}, {}, PasswordResetReqBody>,
   res: Response
 ) {
+  const { email, password, newPassword } = req.body;
+  if (!email || !password || !newPassword) {
+    res.status(400).json({
+      error:
+        "Must provide email address, old password, and new password to reset password",
+    });
+    return;
+  }
   try {
-    const { email, password, newPassword } = req.body;
     const courier = await Courier.findOne({
       where: {
         email,
       },
     });
     if (!courier) {
-      console.error(
-        "passwordReset: Authentication failed (Courier does not exist)"
-      );
-      return res.status(401).json({ error: "Authentication failed" });
+      return res.status(401).json({ error: "Courier does not exist" });
     }
     const passwordMatch = await bcrypt.compare(password, courier.password);
     if (!passwordMatch) {
-      console.error("signup: Authentication failed (Password does not match)");
-      return res.status(401).json({ error: "Authentication failed" });
+      return res.status(401).json({ error: "Password does not match" });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -111,7 +123,6 @@ export async function passwordReset(
 
     res.status(200).json({ message: "Password reset successfully" });
   } catch (error) {
-    console.error("signup: Registration failed", error);
-    res.status(500).json({ error: "Login failed" });
+    res.status(500).json({ error: "Password reset failed" });
   }
 }
