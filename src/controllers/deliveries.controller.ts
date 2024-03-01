@@ -77,19 +77,20 @@ export async function updateDeliveryStatus(
   req: Request<{ id: string }, {}, { status: OrderStatus }>,
   res: Response
 ) {
+        if (
+          req.body.status == OrderStatus["created"] ||
+          req.body.status == OrderStatus["canceled"]
+        ) {
+          res.status(400).json({
+            message:
+              "Use `undispatch` to set status to `created` and `cancelDelivery` to set status to `canceled`",
+          });
+        }
   try {
     const id = req.params.id;
-      const { status } = req.body;
-      
-    if (status == OrderStatus["created"] || status == OrderStatus["canceled"]) {
-      res.status(400).json({
-        message:
-          "Use `undispatch` to set status to `created` and `cancelDelivery` to set status to `canceled`",
-      });
-    }
 
     const [affectedRows] = await Order.update(
-      { status },
+      req.body,
       {
         where: {
           id,

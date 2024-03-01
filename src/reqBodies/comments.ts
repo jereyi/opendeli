@@ -1,6 +1,6 @@
-export type CommentReqBody = {
+export type CreateCommentReqBody = {
   text?: string;
-  merchantId?: string;
-    locationId?: string;
-    commentId: string;
+  MerchantId?: string;
+  LocationId?: string;
+  CommentId: string;
 };

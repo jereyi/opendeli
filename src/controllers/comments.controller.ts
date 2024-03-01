@@ -2,9 +2,12 @@ import { Request, Response } from "express";
 import Comment from "../models/comment.model";
 import Merchant from "../models/merchant.model";
 import Location from "../models/location.model";
-import { CommentReqBody } from "../reqBodies/comments";
+import {
+  CreateCommentReqBody
+} from "../reqBodies/comments";
+import { ReqParams } from "../reqBodies/common";
 
-export async function getComments(req: Request, res: Response) {
+export async function getComments(res: Response) {
   try {
     const comments = await Comment.findAll();
 
@@ -15,7 +18,7 @@ export async function getComments(req: Request, res: Response) {
   }
 }
 
-export async function getComment(req: Request<{ id: string }>, res: Response) {
+export async function getComment(req: Request<ReqParams>, res: Response) {
   try {
     const id = req.params.id;
     const comment = await Comment.findByPk(id);
@@ -27,40 +30,62 @@ export async function getComment(req: Request<{ id: string }>, res: Response) {
   }
 }
 
-//Courier ID needs to be saved as a request cookie
+// The save() instance method is not aware of associations, so you must set the association on the
+// parent object as well
+// https://sequelize.org/docs/v6/core-concepts/assocs/#creating-updating-and-deleting
 export async function createComment(
-  req: Request<{}, {}, CommentReqBody>,
+  req: Request<{}, {}, CreateCommentReqBody>,
   res: Response
 ) {
+  if (!req.body.text) {
+    res.status(400).send({
+      message: "Comment cannot be empty",
+    });
+    return;
+  }
+  if (!req.body.MerchantId && !req.body.LocationId) {
+    res.status(400).send({
+      message: "Comment must be associate with a merchant or a location",
+    });
+    return;
+  }
   try {
-    const { text, merchantId, locationId, commentId } = req.body;
-    const comment = await Comment.create({ text });
+    const newComment = await Comment.create(req.body);
 
-    if (merchantId) {
-      const merchant = await Merchant.findByPk(merchantId);
+    if (req.body.MerchantId) {
+      const merchant = await Merchant.findByPk(req.body.MerchantId);
 
       if (merchant) {
-        comment.setMerchant(merchant);
-        merchant.addComment(comment);
-      } else res.status(400).json({ message: "Merchant does not exist" });
+        merchant.addComment(newComment);
+      } else {
+        res.status(400).json({ message: "Merchant does not exist" });
+        await newComment.destroy();
+        return;
+      }
     }
 
-    if (locationId) {
-      const location = await Location.findByPk(locationId);
+    if (req.body.LocationId) {
+      const location = await Location.findByPk(req.body.LocationId);
 
       if (location) {
-        comment.setLocation(location);
-        location.addComment(comment);
-      } else res.status(400).json({ message: "Location does not exist" });
+        location.addComment(newComment);
+      } else {
+        res.status(400).json({ message: "Location does not exist" });
+        await newComment.destroy();
+        return;
+      }
     }
 
-    if (commentId) {
-      const parentComment = await Comment.findByPk(commentId);
+    if (req.body.CommentId) {
+      const parentComment = await Comment.findByPk(req.body.CommentId);
 
       if (parentComment) {
-        comment.setComment(parentComment);
-        parentComment.addReply(comment);
-      } else res.status(400).json({ message: "Parent comment does not exist" });
+        parentComment.addReply(newComment);
+      } else {
+        res.status(400).json({ message: "Parent comment does not exist" });
+        await newComment.destroy();
+        return;
+      }
     }
 
     res.status(200).json({ message: "Comment created successfully" });
@@ -70,61 +95,30 @@ export async function createComment(
   }
 }
 
-// TODO: MAKE SURE FUNCTION ENDS AFTER ERROR MESSAGE
 export async function updateComment(
-  req: Request<{ id: string }>,
+  req: Request<{ id: string }, {}, { text: string }>,
   res: Response
 ) {
+  if (!req.body.text) {
+    res.status(400).send({
+      message: "Comment cannot be empty",
+    });
+    return;
+  }
   try {
     const id = req.params.id;
-    const { text, merchantId, locationId } = req.body;
-    const [affectedRows, comments] = await Comment.update(
-      { text },
-      {
-        where: {
-          id,
-        },
-        returning: true,
-      }
-    );
+    const [affectedRows] = await Comment.update(req.body, {
+      where: {
+        id,
+      },
+    });
 
     if (!affectedRows)
       res.status(400).json({ message: "Comment does not exist" });
-
-    if (merchantId) {
-      // If `MerchantId` already set, unassociate comment with old merchant
-      if (comments[0].MerchantId) {
-        const oldMerchant = await Merchant.findByPk(comments[0].MerchantId);
-        oldMerchant?.removeComment(id);
-      }
-      const newMerchant = await Merchant.findByPk(merchantId);
-      if (newMerchant) {
-        newMerchant?.addComment(comments[0]);
-        comments[0].setMerchant(newMerchant);
-      } else {
-        res.status(400).json({ message: "Merchant does not exist" });
-      }
-    }
-
-    if (locationId) {
-      // If `LocationId` already set, unassociate comment with old merchant
-      if (comments[0].LocationId) {
-        const oldLocation = await Location.findByPk(comments[0].LocationId);
-        oldLocation?.removeComment(id);
-      }
-      const newLocation = await Location.findByPk(locationId);
-      if (newLocation) {
-        newLocation?.addComment(comments[0]);
-        comments[0].setLocation(newLocation);
-      } else {
-        res.status(400).json({ message: "Location does not exist" });
-      }
-    }
-
-    res.status(200).json({ message: "Comment updated successfully" });
+    else res.status(200).json({ message: "Comment updated successfully" });
   } catch (error) {
-    console.error("getComments:", error);
-    res.status(500).json({ error: "Error fetching comments" });
+    console.error("updateComment:", error);
+    res.status(500).json({ error: "Error updating comment" });
   }
 }
 
@@ -137,11 +131,11 @@ export async function likeComment(req: Request<{ id: string }>, res: Response) {
       },
     });
 
-    if (affectedRows)
-      res.status(200).json({ message: "Comment liked successfully" });
-    else res.status(400).json({ message: "Comment does not exist" });
+    if (!affectedRows)
+      res.status(400).json({ message: "Comment does not exist" });
+    else res.status(200).json({ message: "Comment liked successfully" });
   } catch (error) {
-    console.error("getComments:", error);
-    res.status(500).json({ error: "Error fetching comments" });
+    console.error("likeComment:", error);
+    res.status(500).json({ error: "Error liking comment" });
   }
 }

@@ -5,9 +5,7 @@ import Setting from "./setting.model";
 import Location from "./location.model";
 import Comment from "./comment.model";
 import Order from "./order.model";
-import { DataTypes } from "sequelize";
-var db = require("./db"),
-  sequelize = db.sequelize;
+import LocationMerchant from "./locationmerchant.model";
 
 Courier.hasMany(Earning, {
   sourceKey: "id",
@@ -25,22 +23,6 @@ Setting.belongsTo(Courier, { targetKey: "id" });
 Courier.hasMany(Order);
 Order.belongsTo(Courier);
 
-const LocationMerchant = sequelize.define("locationmerchants", {
-  LocationId: {
-    type: DataTypes.UUID,
-    references: {
-      model: Location,
-      key: "id",
-    },
-  },
-  MerchantId: {
-    type: DataTypes.UUID,
-    references: {
-      model: Merchant,
-      key: "id",
-    },
-  },
-});
 Location.belongsToMany(Merchant, {through: LocationMerchant});
 Merchant.belongsToMany(Location, { through: LocationMerchant });
 
