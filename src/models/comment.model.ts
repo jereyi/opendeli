@@ -34,9 +34,11 @@ class Comment extends Model<
   declare text: string | null;
   declare likes: CreationOptional<number>;
   // Parent comment id
-  declare CommentId: ForeignKey<Comment["id"]> | null;
-  declare MerchantId: ForeignKey<Merchant["id"]> | null;
-  declare LocationId: ForeignKey<Location["id"]> | null;
+  declare ParentCommentId: ForeignKey<Comment["id"]> | null;
+  declare CommentableId:
+    | ForeignKey<Merchant["id"]>
+    | ForeignKey<Location["id"]>;
+  declare CommentableType: "merchant" | "location";
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 
@@ -49,7 +51,7 @@ class Comment extends Model<
   declare hasReply: HasManyHasAssociationMixin<Comment, string>;
   declare hasReplys: HasManyHasAssociationsMixin<Comment, string>;
   declare countReplys: HasManyCountAssociationsMixin;
-  declare createReply: HasManyCreateAssociationMixin<Comment, "CommentId">;
+  declare createReply: HasManyCreateAssociationMixin<Comment, "ParentCommentId">;
 
   declare getMerchant: BelongsToGetAssociationMixin<Merchant>;
   declare setMerchant: BelongsToSetAssociationMixin<Merchant, string>;
@@ -59,9 +61,30 @@ class Comment extends Model<
   declare setLocation: BelongsToSetAssociationMixin<Location, string>;
   declare createLocation: BelongsToCreateAssociationMixin<Location>;
 
-  declare getComment: BelongsToGetAssociationMixin<Comment>;
-  declare setComment: BelongsToSetAssociationMixin<Comment, string>;
-  declare createComment: BelongsToCreateAssociationMixin<Comment>;
+  getCommentable(options: any) {
+    if (!this.CommentableType) return Promise.resolve(null);
+    const mixinMethodName =
+      this.CommentableType == "location" ? "getLocation" : "getMerchant";
+    return this[mixinMethodName](options);
+  }
+
+  setCommentable(options: any) {
+    if (!this.CommentableType) return Promise.resolve(null);
+    const mixinMethodName =
+      this.CommentableType == "location" ? "setLocation" : "setMerchant";
+    return this[mixinMethodName](options);
+  }
+
+  createCommentable(options: any) {
+    if (!this.CommentableType) return Promise.resolve(null);
+    const mixinMethodName =
+      this.CommentableType == "location" ? "createLocation" : "createMerchant";
+    return this[mixinMethodName](options);
+  }
+
+  declare getParentComment: BelongsToGetAssociationMixin<Comment>;
+  declare setParentComment: BelongsToSetAssociationMixin<Comment, string>;
+  declare createParentComment: BelongsToCreateAssociationMixin<Comment>;
 
   declare Replys?: NonAttribute<Comment[]>;
 
@@ -96,11 +119,39 @@ Comment.init(
       defaultValue: DataTypes.NOW,
       allowNull: false,
     },
+    CommentableId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    CommentableType: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
   {
     tableName: "comments",
     sequelize,
   }
 );
+
+Comment.addHook("afterFind", (findResult) => {
+  if (findResult) {
+    let result;
+    if (!Array.isArray(findResult)) result = [findResult];
+    else {
+      result = findResult
+    }
+    for (const instance of result) {
+      if (instance.commentableType === "location" && instance.Location !== undefined) {
+        instance.commentable = instance.Location;
+      } else if (
+        instance.commentableType === "merchant" &&
+        instance.Merchant !== undefined
+      ) {
+        instance.commentable = instance.Merchant;
+      }
+    }
+  }
+});
 
 export default Comment;

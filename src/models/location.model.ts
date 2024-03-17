@@ -55,7 +55,7 @@ class Location extends Model<
   declare hasComment: HasManyHasAssociationMixin<Comment, string>;
   declare hasComments: HasManyHasAssociationsMixin<Comment, string>;
   declare countComments: HasManyCountAssociationsMixin;
-  declare createComment: HasManyCreateAssociationMixin<Comment, "LocationId">;
+  declare createComment: HasManyCreateAssociationMixin<Comment, "CommentableId">;
 
   declare getMerchants: BelongsToManyGetAssociationsMixin<Merchant>;
   declare addMerchant: BelongsToManyAddAssociationMixin<Merchant, string>;

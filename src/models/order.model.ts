@@ -10,19 +10,23 @@ var db = require("./db"),
 class Order extends Model<
   InferAttributes<Order>,
   InferCreationAttributes<Order>
-> {
+  > {
   declare id: CreationOptional<string>;
   declare CourierId: ForeignKey<Courier["id"]> | null;
   declare MerchantId: ForeignKey<Merchant["id"]> | null;
   declare customerName: string;
   declare status: OrderStatus;
   declare customerNotes: string[];
-  declare courierNotes: string[];;
+  declare courierNotes: string[];
   declare pickupCoords: Point;
   declare dropoffCoords: Point;
   declare items: Item[];
   declare undeliverableAction: string | null;
   declare undeliverableReason: string | null;
+  declare imageType: string | null;
+  declare imageName: string | null;
+  // https://stackoverflow.com/questions/55498140/saving-buffer-on-postgres-bytea-with-typeorm-only-store-10-bytes
+  declare imageData: ArrayBuffer | null;
   declare currencyCode: string;
   declare grossRevenue: number;
   declare fees: number;
@@ -116,6 +120,15 @@ Order.init(
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
+    },
+    imageType: {
+      type: DataTypes.STRING,
+    },
+    imageName: {
+      type: DataTypes.STRING,
+    },
+    imageData: {
+      type: DataTypes.BLOB("long"),
     },
     createdAt: {
       type: DataTypes.DATE,

@@ -54,7 +54,10 @@ class Merchant extends Model<
   declare hasComment: HasManyHasAssociationMixin<Comment, string>;
   declare hasComments: HasManyHasAssociationsMixin<Comment, string>;
   declare countComments: HasManyCountAssociationsMixin;
-  declare createComment: HasManyCreateAssociationMixin<Comment, "MerchantId">;
+  declare createComment: HasManyCreateAssociationMixin<
+    Comment,
+    "CommentableId"
+  >;
 
   declare getLocations: BelongsToManyGetAssociationsMixin<Location>;
   declare addLocation: BelongsToManyAddAssociationMixin<Location, string>;
