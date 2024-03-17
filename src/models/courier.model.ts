@@ -40,12 +40,17 @@ class Courier extends Model<
   declare email: string;
   declare password: string;
   declare phoneNumber: string | null;
+  // declare imageType: string | null;
+  // declare imageName: string | null;
+  // // https://stackoverflow.com/questions/55498140/saving-buffer-on-postgres-bytea-with-typeorm-only-store-10-bytes
+  // declare imageData: ArrayBuffer | null;
   declare node_uri: CreationOptional<string>;
   declare isAvailable: CreationOptional<boolean>;
   declare orderSetting: OrderSetting | null;
-  declare currentLocation:  Point | null;
+  declare currentLocation: Point | null;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
+  declare rejectedOffers: CreationOptional<string[]>;
 
   declare getEarnings: HasManyGetAssociationsMixin<Earning>;
   declare addEarning: HasManyAddAssociationMixin<Earning, string>;
@@ -58,17 +63,32 @@ class Courier extends Model<
   declare countEarnings: HasManyCountAssociationsMixin;
   declare createEarning: HasManyCreateAssociationMixin<Earning, "CourierId">;
 
+  declare getAcceptedOrders: HasManyGetAssociationsMixin<Order>;
+  declare addAcceptedOrder: HasManyAddAssociationMixin<Order, string>;
+  declare addAcceptedOrders: HasManyAddAssociationsMixin<Order, string>;
+  declare setAcceptedOrders: HasManySetAssociationsMixin<Order, string>;
+  declare removeAcceptedOrder: HasManyRemoveAssociationMixin<Order, string>;
+  declare removeAcceptedOrders: HasManyRemoveAssociationsMixin<Order, string>;
+  declare hasAcceptedOrder: HasManyHasAssociationMixin<Order, string>;
+  declare hasAcceptedOrders: HasManyHasAssociationsMixin<Order, string>;
+  declare countAcceptedOrders: HasManyCountAssociationsMixin;
+  declare createAcceptedOrder: HasManyCreateAssociationMixin<
+    Order,
+    "CourierId"
+  >;
+
   declare getSetting: HasOneGetAssociationMixin<Setting>;
   declare setSetting: HasOneSetAssociationMixin<Setting, string>;
   declare createSetting: HasOneCreateAssociationMixin<Setting>;
 
   declare Setting?: NonAttribute<Setting>;
   declare Earnings?: NonAttribute<Earning[]>;
+  declare AcceptedOrders?: NonAttribute<Order[]>;
 
   declare static associations: {
     Setting: Association<Courier, Setting>;
     Earnings: Association<Courier, Earning>;
-    Orders: Association<Courier, Order>;
+    AcceptedOrders: Association<Courier, Order>;
   };
 }
 
@@ -106,6 +126,15 @@ Courier.init(
       type: DataTypes.STRING,
       unique: true,
     },
+    // imageType: {
+    //   type: DataTypes.STRING,
+    // },
+    // imageName: {
+    //   type: DataTypes.STRING,
+    // },
+    // imageData: {
+    //   type: DataTypes.BLOB('long'),
+    // },
     isAvailable: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
@@ -116,6 +145,11 @@ Courier.init(
     },
     currentLocation: {
       type: DataTypes.GEOMETRY,
+    },
+    rejectedOffers: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
+      allowNull: false,
     },
     createdAt: {
       type: DataTypes.DATE,

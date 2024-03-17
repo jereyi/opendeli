@@ -32,8 +32,12 @@ export async function signup(
         email,
         password: hashedPassword,
         phoneNumber,
+        // imageType: profilePicture?.type,
+        // imageName: profilePicture?.name,
+        // imageData: await profilePicture?.arrayBuffer(),
+        },
       },
-    });
+    );
     if (created) {
       // Create corresponding settings object
       await courier.createSetting();
@@ -69,6 +73,7 @@ export async function login(req: Request<{}, {}, LoginReqBody>, res: Response) {
     }
     const passwordMatch = await bcrypt.compare(password, courier.password);
     if (!passwordMatch) {
+      console.log("password mismatch")
       return res.status(401).json({ error: "Password does not match" });
     }
     // TODO: Set up secret key

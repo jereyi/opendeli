@@ -20,20 +20,20 @@ router.get("/", verifyToken, getCouriers);
 router.get("/:id", verifyToken, getCourier);
 
 //router.get("/:id/profile", verifyToken, getCourierProfile);
-router.patch("/:id/profile", verifyToken, updateCourierProfile);
+router.patch("/profile/:id", verifyToken, updateCourierProfile);
 
-router.get("/:id/full-settings", verifyToken, getCourierFullSettings);
-router.patch("/:id/full-settings", verifyToken, updateCourierFullSettings);
+router.get("/full-settings/:id", verifyToken, getCourierFullSettings);
+router.patch("/full-settings/:id", verifyToken, updateCourierFullSettings);
 
 //router.get("/:id/availability", verifyToken, getCourierAvailability);
-router.patch("/:id/availability", verifyToken, updateCourierAvailability);
+router.patch("/availability/:id", verifyToken, updateCourierAvailability);
 
 //router.get("/:id/order-setting", verifyToken, getCourierOrderSetting);
-router.patch("/:id/order-setting", verifyToken, updateCourierOrderSetting);
+router.patch("/order-settings/:id", verifyToken, updateCourierOrderSetting);
 
 //router.get("/:id/current-location", verifyToken, getCourierCurrentLocation);
 router.patch(
-  "/:id/current-location",
+  "/current-location/:id",
   verifyToken,
   updateCourierCurrentLocation
 );

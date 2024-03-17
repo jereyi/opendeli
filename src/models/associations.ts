@@ -20,20 +20,26 @@ Courier.hasOne(Setting, {
 });
 Setting.belongsTo(Courier, { targetKey: "id" });
 
-Courier.hasMany(Order);
+Courier.hasMany(Order, {as: "AcceptedOrders"});
 Order.belongsTo(Courier);
 
 Location.belongsToMany(Merchant, {through: LocationMerchant});
 Merchant.belongsToMany(Location, { through: LocationMerchant });
 
 Location.hasMany(Comment);
-Comment.belongsTo(Location);
+Comment.belongsTo(Location, {
+  foreignKey: "commentableId",
+  constraints: false,
+});
+
+Merchant.hasMany(Comment);
+Comment.belongsTo(Merchant, {
+  foreignKey: "commentableId",
+  constraints: false,
+});
 
 Merchant.hasMany(Order);
 Order.belongsTo(Merchant);
-
-Merchant.hasMany(Comment);
-Comment.belongsTo(Merchant);
 
 Comment.hasMany(Comment, {
   sourceKey: "id",
@@ -41,5 +47,5 @@ Comment.hasMany(Comment, {
   as: "Replys",
   onDelete: "CASCADE",
 });
-Comment.belongsTo(Comment);
+Comment.belongsTo(Comment, {as: "ParentComment"});
 

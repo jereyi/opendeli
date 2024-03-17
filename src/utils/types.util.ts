@@ -14,8 +14,9 @@ export type EarningGoals = {
 };
 
 export type PayRate = {
-  hourlyDate: number;
+  hourlyRate: number;
   perDeliveryRate: number;
+  // Per mile
   distanceBasedRate: number;
   surgePricingPreference: number;
   minimumEarningsGuarantee: number;
@@ -31,4 +32,5 @@ export type Item = {
   height: number;
   weight: number;
   keepUpright: boolean;
+  confirmed: boolean;
 };

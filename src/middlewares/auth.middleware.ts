@@ -22,3 +22,5 @@ export function verifyToken(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+export default { verifyToken };
+

@@ -45,13 +45,13 @@ export async function getCouriers(
       baseQuery += " " + sortByDistanceQuery;
     }
 
-    const couriers = await sequelize.query(baseQuery, {
+    const rows = await sequelize.query(baseQuery, {
       replacements,
       model: Courier,
       type: QueryTypes.SELECT,
     });
-
-    res.status(200).json({ couriers });
+  
+    res.status(200).json({ couriers: rows.map((courier: Courier) => courier.dataValues) });
   } catch (error) {
     console.error("getCouriers:", error);
     res.status(500).json({ error: "Error fetching couriers" });
@@ -64,7 +64,8 @@ export async function getCourier(req: Request<{ id: string }>, res: Response) {
     const courier = await Courier.findByPk(id);
 
     if (courier) {
-      res.status(200).json({ courier });
+      console.log("datavals", courier.dataValues)
+      res.status(200).json({ courier: courier.dataValues });
     } else {
       res.status(404).json({ message: "Courier not found" });
     }
@@ -87,6 +88,11 @@ export async function updateCourierProfile(
     if (lastName) updates.lastName = lastName;
     if (email) updates.email = email;
     if (phoneNumber) updates.phoneNumber;
+    // if (profilePicture) {
+    //   updates.imageType = profilePicture.type;
+    //   updates.imageName = profilePicture.name;
+    //   updates.imageData = await profilePicture.arrayBuffer();
+    // }
 
     const [affectedRows] = await Courier.update(updates, {
       where: {
@@ -110,8 +116,9 @@ export async function getCourierFullSettings(req: Request, res: Response) {
     const id = req.params.id;
     const courier = await Courier.findByPk(id, { include: Setting });
 
+    console.log("full settings courier", courier)
     if (courier) {
-      res.status(200).json({ setting: courier.Setting});
+      res.status(200).json({ setting: courier.Setting?.dataValues});
     } else {
       res.status(404).json({ message: "Courier not found" });
     }
@@ -138,7 +145,7 @@ export async function updateCourierFullSettings(
       earningGoals,
       deliverySpeed,
       restaurantTypes,
-      cuisineType,
+      cuisineTypes,
       preferredRestaurantPartners,
       dietaryRestrictions,
       payRate,
@@ -156,7 +163,7 @@ export async function updateCourierFullSettings(
       if (earningGoals) setting.earningGoals = earningGoals;
       if (deliverySpeed) setting.deliverySpeed = deliverySpeed;
       if (restaurantTypes) setting.restaurantTypes = restaurantTypes;
-      if (cuisineType) setting.cuisineType = cuisineType;
+      if (cuisineTypes) setting.cuisineTypes = cuisineTypes;
       if (preferredRestaurantPartners)
         setting.preferredRestaurantPartners = preferredRestaurantPartners;
       if (dietaryRestrictions)
@@ -222,10 +229,13 @@ export async function updateCourierOrderSetting(
         },
       }
     );
+    
+    console.log("affected", affectedRows);
 
     if (affectedRows > 0) {
       res.status(200).json({ message: "Order setting updated successfully" });
     } else {
+      console.log("Courier not found")
       res.status(404).json({ message: "Courier not found" });
     }
   } catch (error) {

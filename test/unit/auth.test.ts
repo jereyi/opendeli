@@ -15,12 +15,20 @@ describe("auth route", function () {
     });
 
     it("Should register courier successfully", async function () {
+      // const image = await fetch(faker.image.url());
+      // let imageData = await image.blob();
+      // let metadata = {
+      //   type: "image/jpeg",
+      // };
+
+      // let file = new File([imageData], "random.jpg", metadata);
       const reqBody = {
         firstName: faker.person.firstName(),
         lastName: faker.person.lastName(),
         email: faker.internet.email(),
         password: faker.internet.password(),
         phoneNumber: faker.phone.number(),
+        // profilePicture: JSON.stringify(file),
       };
       const response = await auth("signup", reqBody, 201);
       const data = response.body;
@@ -36,6 +44,12 @@ describe("auth route", function () {
         },
         include: Setting,
       });
+
+      expect(couriers.length).equals(1);
+      const courier = couriers.at(0);
+      // expect(courier!.imageType).equals("image/jpeg");
+      // expect(courier!.imageData).equals(imageData);
+      // expect(courier!.imageName, "random.jpg");
     });
 
     it("Should register courier successfully without phone number", async function () {
@@ -210,7 +224,7 @@ describe("auth route", function () {
         {
           email: reqBody.email,
           password: reqBody.password,
-          newPassword: faker.internet.password(),
+          newPassword: "New Password",
         },
         200
       );
@@ -252,28 +266,28 @@ describe("auth route", function () {
       expect(data.error).equals("Password does not match");
     });
 
-     it("Should fail to reset password with invalid email", async function () {
-       const reqBody = {
-         firstName: faker.person.firstName(),
-         lastName: faker.person.lastName(),
-         email: faker.internet.email(),
-         password: faker.internet.password(),
-         phoneNumber: faker.phone.number(),
-       };
-       await auth("signup", reqBody, 201);
-       const response = await auth(
-         "password-reset",
-         {
-           email: faker.internet.email(),
-           password: reqBody.password,
-           newPassword: faker.internet.password(),
-         },
-         401
-       );
-       const data = response.body;
+    it("Should fail to reset password with invalid email", async function () {
+      const reqBody = {
+        firstName: faker.person.firstName(),
+        lastName: faker.person.lastName(),
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        phoneNumber: faker.phone.number(),
+      };
+      await auth("signup", reqBody, 201);
+      const response = await auth(
+        "password-reset",
+        {
+          email: faker.internet.email(),
+          password: reqBody.password,
+          newPassword: faker.internet.password(),
+        },
+        401
+      );
+      const data = response.body;
 
-       expect(data.error).equals("Courier does not exist");
-     });
+      expect(data.error).equals("Courier does not exist");
+    });
 
     it("Should fail to reset password if no new password specified", async function () {
       const reqBody = {
@@ -296,13 +310,17 @@ describe("auth route", function () {
       );
     });
   });
-
-  async function auth(path: string, reqBody: object | undefined, status = 200) {
-    const response = await request(app)
-      .post(`/auth/${path}`)
-      .send(reqBody)
-      .set("Content-Type", "application/json")
-      .expect(status);
-    return response;
-  }
 });
+
+export async function auth(
+  path: string,
+  reqBody: object | undefined,
+  status = 200
+) {
+  const response = await request(app)
+    .post(`/auth/${path}`)
+    .send(reqBody)
+    .set("Content-Type", "application/json")
+    .expect(status);
+  return response;
+}

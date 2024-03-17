@@ -25,7 +25,7 @@ export type SettingsReqBody = {
   earningGoals?: EarningGoals;
   deliverySpeed?: DeliverySpeed;
   restaurantTypes?: RestaurantTypes[];
-  cuisineType?: CuisineTypes[];
+  cuisineTypes?: CuisineTypes[];
   preferredRestaurantPartners?: string[];
   dietaryRestrictions?: DietaryRestrictions[];
   payRate?: PayRate;
