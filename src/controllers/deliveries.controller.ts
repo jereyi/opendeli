@@ -231,4 +231,35 @@ export async function cancelDelivery(
 }
 
 // TODO: Implement matrix integration
-export async function contactCustomer(req: Request, res: Response) {}
+export async function contactCustomer(req: Request, res: Response) { }
+
+export async function markAsDelivered(req: Request<{ id: string }, {}, { photo?: File }>, res: Response) {
+  try {
+    const id = req.params.id;
+    const photo = req.body.photo;
+    const updates: any = {}
+    if (photo) {
+      updates.imageType = photo.type;
+      updates.imageName = photo.name;
+      updates.imageData = await photo.arrayBuffer();
+    }
+    updates.status = "dropped_off"
+    const [affectedRows] = await Order.update(
+      updates,
+      {
+        where: {
+          id,
+        },
+      }
+    );
+
+    if (affectedRows) {
+      res.status(200).json({ message: "Mark as delivery successful" });
+    } else {
+      res.status(404).json({ message: "Delivery not found" });
+    }
+  } catch (error) {
+    console.error("markAsDelivered:", error);
+    res.status(500).json({ error: "Error fetching delivery" });
+  }
+}

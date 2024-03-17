@@ -14,6 +14,7 @@ import {
   reportIssue,
   undispatch,
   cancelDelivery,
+  markAsDelivered,
 } from "../controllers/deliveries.controller";
 import { verifyToken } from "../middlewares/auth.middleware";
 
@@ -23,7 +24,7 @@ router.get("/:id", verifyToken, getDelivery);
 
 // router.patch("/:id", verifyToken, updateDelivery);
 
-// QQQ: We don't want the client to be able to change intristic order 
+// QQQ: We don't want the client to be able to change intristic order
 // details like the items, customer name, merchant id, etc.
 
 // router.get(":id/items", verifyToken, getDeliveryItems);
@@ -45,5 +46,8 @@ router.post("/:id/contact-customer", verifyToken, contactCustomer);
 // router.get("/:id", verifyToken, getCourierNotes);
 
 router.post("/:id/report-issue", verifyToken, reportIssue);
+
+// Add mark as delivery
+router.post("/id/markAsDelivered", verifyToken, markAsDelivered)
 
 export default router;

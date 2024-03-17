@@ -3,7 +3,8 @@ const router = Router();
 import {
   getOffers,
   getOffer,
-  dispatch,
+  acceptOffer,
+  rejectOffer
 } from "../controllers/offers.controller";
 import { verifyToken } from "../middlewares/auth.middleware";
 
@@ -11,6 +12,11 @@ router.get("/", verifyToken, getOffers);
 
 router.get("/:id", verifyToken, getOffer);
 
-router.patch("/:id", verifyToken, dispatch);
+router.get("/accept/:id", verifyToken, acceptOffer);
+
+router.patch("/reject/:id", verifyToken, rejectOffer);
+
+
+
 
 export default router;
