@@ -9,6 +9,7 @@ import locationsRouter from "./src/routes/locations.route";
 import earningsRouter from "./src/routes/earnings.route";
 import payoutsRouter from "./src/routes/payouts.route";
 import dotenv from "dotenv";
+import cors from "cors";
 import "./src/models/associations";
 
 
@@ -16,6 +17,8 @@ dotenv.config();
 
 const app: Express = express();
 const port: number = +(process.env.PORT || 3000);
+
+app.use(cors());
 
 app.use(bodyParser.json());
 app.use(

@@ -17,7 +17,7 @@ export enum RestaurantTypes {
   "local",
   "chain",
   "black_owned",
-  "woman_owned",
+  "women_owned",
   "franchise",
   'upscale',
   "fast_casual",
@@ -73,4 +73,10 @@ export enum OrderStatus {
   "picked_up",
   "dropped_off",
   "canceled",
+}
+
+export enum UserStatus {
+  "online",
+  "offline",
+  "last_call",
 }

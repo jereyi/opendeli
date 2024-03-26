@@ -6,7 +6,7 @@ import {
   SettingsReqBody,
 } from "../reqBodies/couriers";
 import Setting from "../models/setting.model";
-import { OrderSetting } from "../utils/enum.util";
+import { OrderSetting, UserStatus } from "../utils/enum.util";
 import { Point } from "geojson";
 import { QueryTypes } from "sequelize";
 var db = require("../models/db"),
@@ -31,7 +31,7 @@ export async function getCouriers(
       baseQuery = `SELECT * FROM "couriers"`;
     }
     const deliveryPolygonQuery = `ST_Intersects(ST_SetSRID(ST_MakePoint(:latitude, :longitude), 4326), "deliveryPolygon")`;
-    const isAvailableQuery = '"isAvailable"';
+    const isAvailableQuery = `status = 'online' OR status = 'last_call'`;
     const sortByDistanceQuery = "ORDER BY distance ASC";
 
     if (useDeliveryPolygon) {
@@ -116,14 +116,15 @@ export async function getCourierFullSettings(req: Request, res: Response) {
     const id = req.params.id;
     const courier = await Courier.findByPk(id, { include: Setting });
 
-    console.log("full settings courier", courier)
     if (courier) {
-      res.status(200).json({ setting: courier.Setting?.dataValues});
+      console.log("Courier settings fetched successfully");
+      res.status(200).json({ settings: courier.Setting?.dataValues});
     } else {
+      console.log("Courier not found")
       res.status(404).json({ message: "Courier not found" });
     }
   } catch (error) {
-    console.error("getCourierFullSettings:", error);
+    console.error(error);
     res.status(500).json({ error: "Error fetching courier setting" });
   }
 }
@@ -170,46 +171,59 @@ export async function updateCourierFullSettings(
         setting.dietaryRestrictions = dietaryRestrictions;
       if (payRate) setting.payRate = payRate;
 
-      await Setting.update(setting, {
+      const [count, rows]  = await Setting.update(setting, {
         where: {
           CourierId: id,
         },
+        returning: true
       });
-      res.status(200).json({ message: "Courier setting updated successfully" });
+      if (count) {
+        console.log("Settings updated successfully");
+        res.status(200).json({ settings: rows[0].dataValues });
+      } else {
+        console.log("Error updating courier setting");
+        res.status(500).json({ message: "Error updating courier setting" });
+      }
     } else {
+      console.log("Courier not found");
       res.status(404).json({ message: "Courier not found" });
     }
   } catch (error) {
     console.error("updateCourierFullSettings:", error);
-    res.status(500).json({ error: "Error fetching courier setting" });
+    res.status(500).json({ error: "Error updating courier setting" });
   }
 }
 
-export async function updateCourierAvailability(
-  req: Request<{ id: string }, {}, { isAvailable: boolean }>,
+export async function updateCourierStatus(
+  req: Request<{ id: string }, {}, { status: UserStatus }>,
   res: Response
 ) {
   try {
     const id = req.params.id;
-    const { isAvailable } = req.body;
+    const { status } = req.body;
 
-    const [affectedRows] = await Courier.update(
-      { isAvailable },
+    console.log(status)
+
+    const [affectedCount, affectedRows] = await Courier.update(
+      { status },
       {
         where: {
           id,
         },
+        returning: true,
       }
     );
 
-    if (affectedRows > 0) {
-      res.status(200).json({ message: "Availability updated successfully" });
+    if (affectedCount > 0) {
+      console.log("Status updated successfully");
+      res.status(200).json({ courier: affectedRows[0].dataValues});
     } else {
+      console.log("Courier not found");
       res.status(404).json({ message: "Courier not found" });
     }
   } catch (error) {
-    console.error("updateCourierAvailability:", error);
-    res.status(500).json({ error: "Error updating availability" });
+    console.error("updateCourierStatus:", error);
+    res.status(500).json({ error: "Error updating status" });
   }
 }
 
@@ -221,19 +235,18 @@ export async function updateCourierOrderSetting(
     const id = req.params.id;
     const { orderSetting } = req.body;
 
-    const [affectedRows] = await Courier.update(
+    const [affectedCount, affectedRows] = await Courier.update(
       { orderSetting },
       {
         where: {
           id,
         },
+        returning: true
       }
     );
-    
-    console.log("affected", affectedRows);
 
-    if (affectedRows > 0) {
-      res.status(200).json({ message: "Order setting updated successfully" });
+    if (affectedCount > 0) {
+      res.status(200).json({ courier: affectedRows[0].dataValues});
     } else {
       console.log("Courier not found")
       res.status(404).json({ message: "Courier not found" });

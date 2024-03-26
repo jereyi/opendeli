@@ -72,16 +72,28 @@ Setting.init(
     },
     preferredAreas: {
       type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: []
     },
     shiftAvailability: {
       type: DataTypes.JSON,
+      defaultValue: {
+        sunday: [],
+        monday: [],
+        tuesday: [],
+        wednesday: [],
+        thursday: [],
+        friday: [],
+        saturday: [],
+      }
     },
     // Guard array against duplicates
     orderPreferences: {
       type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
     },
     foodPreferences: {
       type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
     },
     // Structure: daily or weekly (keys) => goal amount (values)
     earningGoals: {
@@ -89,18 +101,23 @@ Setting.init(
     },
     deliverySpeed: {
       type: DataTypes.ENUM("regular", "rush"),
+      defaultValue: "regular",
     },
     restaurantTypes: {
       type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
     },
     cuisineTypes: {
       type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
     },
     preferredRestaurantPartners: {
       type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
     },
     dietaryRestrictions: {
       type: DataTypes.ARRAY(DataTypes.STRING),
+      defaultValue: [],
     },
     // hourly_date, per_delivery_rate, distance_based_rate,
     // surge_pricing_preference, or minimum_earnings_guarantee (keys)

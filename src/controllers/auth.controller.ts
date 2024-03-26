@@ -35,27 +35,38 @@ export async function signup(
         // imageType: profilePicture?.type,
         // imageName: profilePicture?.name,
         // imageData: await profilePicture?.arrayBuffer(),
-        },
       },
-    );
+    });
     if (created) {
       // Create corresponding settings object
       await courier.createSetting();
+      const token = jwt.sign(
+        { courierId: courier.id },
+        process.env.SECRET_KEY || "my-secret-key",
+        {
+          expiresIn: "24h",
+        }
+      );
+      console.log(`Courier with email ${email} registered successfully`);
       res.status(201).json({
-        message: "Courier registered successfully",
+        courier: courier.dataValues,
+        token,
       });
     } else {
-      res.status(200).json({
-        message: "Courier already exists",
+      console.log(`Courier ${email} already exists`);
+      res.status(409).json({
+        error: `Courier with email ${email} already exists`,
       });
     }
   } catch (error) {
+    console.log("Registration failed: ", error);
     res.status(500).json({ error: "Registration failed" });
   }
 }
 
 export async function login(req: Request<{}, {}, LoginReqBody>, res: Response) {
   const { email, password } = req.body;
+  console.log("hit login");
   if (!email || !password) {
     res.status(400).json({
       error: "Must provide email address and password to log in",
@@ -73,7 +84,7 @@ export async function login(req: Request<{}, {}, LoginReqBody>, res: Response) {
     }
     const passwordMatch = await bcrypt.compare(password, courier.password);
     if (!passwordMatch) {
-      console.log("password mismatch")
+      console.log("password mismatch");
       return res.status(401).json({ error: "Password does not match" });
     }
     // TODO: Set up secret key
@@ -84,7 +95,7 @@ export async function login(req: Request<{}, {}, LoginReqBody>, res: Response) {
         expiresIn: "24h",
       }
     );
-    res.status(200).json({ token });
+    res.status(200).json({ courier: courier.dataValues, token });
   } catch (error) {
     res.status(500).json({ error: "Login failed" });
   }

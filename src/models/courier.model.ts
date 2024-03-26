@@ -20,7 +20,7 @@ import {
   NonAttribute,
   Association,
 } from "sequelize";
-import { OrderSetting } from "../utils/enum.util";
+import { OrderSetting, UserStatus } from "../utils/enum.util";
 import { Point } from "geojson";
 import Setting from "./setting.model";
 import Earning from "./earning.model";
@@ -45,7 +45,7 @@ class Courier extends Model<
   // // https://stackoverflow.com/questions/55498140/saving-buffer-on-postgres-bytea-with-typeorm-only-store-10-bytes
   // declare imageData: ArrayBuffer | null;
   declare node_uri: CreationOptional<string>;
-  declare isAvailable: CreationOptional<boolean>;
+  declare status: CreationOptional<UserStatus>;
   declare orderSetting: OrderSetting | null;
   declare currentLocation: Point | null;
   declare createdAt: CreationOptional<Date>;
@@ -135,13 +135,15 @@ Courier.init(
     // imageData: {
     //   type: DataTypes.BLOB('long'),
     // },
-    isAvailable: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: true,
+    status: {
+      type: DataTypes.ENUM('online', 'offline', 'last_call'),
+      defaultValue: 'offline',
       allowNull: false,
     },
     orderSetting: {
       type: DataTypes.ENUM("auto_accept", "auto_reject", "manual"),
+      defaultValue: "manual",
+      allowNull: false
     },
     currentLocation: {
       type: DataTypes.GEOMETRY,

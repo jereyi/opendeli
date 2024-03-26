@@ -8,7 +8,7 @@ import {
   getCourierFullSettings,
   updateCourierFullSettings,
  // getCourierAvailability,
-  updateCourierAvailability,
+  updateCourierStatus,
   //getCourierOrderSetting,
   updateCourierOrderSetting,
   //getCourierCurrentLocation,
@@ -26,10 +26,10 @@ router.get("/full-settings/:id", verifyToken, getCourierFullSettings);
 router.patch("/full-settings/:id", verifyToken, updateCourierFullSettings);
 
 //router.get("/:id/availability", verifyToken, getCourierAvailability);
-router.patch("/availability/:id", verifyToken, updateCourierAvailability);
+router.patch("/status/:id", verifyToken, updateCourierStatus);
 
 //router.get("/:id/order-setting", verifyToken, getCourierOrderSetting);
-router.patch("/order-settings/:id", verifyToken, updateCourierOrderSetting);
+router.patch("/order-setting/:id", verifyToken, updateCourierOrderSetting);
 
 //router.get("/:id/current-location", verifyToken, getCourierCurrentLocation);
 router.patch(
