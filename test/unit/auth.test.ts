@@ -33,23 +33,13 @@ describe("auth route", function () {
       const response = await auth("signup", reqBody, 201);
       const data = response.body;
 
-      expect(data.message).equals("Courier registered successfully");
+      expect(data.courier).to.not.be.null;
+      expect(data.token).to.not.be.null;
 
-      const couriers = await Courier.findAll({
-        where: {
-          firstName: reqBody.firstName,
-          lastName: reqBody.lastName,
-          email: reqBody.email,
-          phoneNumber: reqBody.phoneNumber,
-        },
-        include: Setting,
-      });
-
-      expect(couriers.length).equals(1);
-      const courier = couriers.at(0);
-      // expect(courier!.imageType).equals("image/jpeg");
-      // expect(courier!.imageData).equals(imageData);
-      // expect(courier!.imageName, "random.jpg");
+      expect(data.courier.firstName).equals(reqBody.firstName);
+      expect(data.courier.lastName).equals(reqBody.lastName);
+      expect(data.courier.email).equals(reqBody.email);
+      expect(data.courier.phoneNumber).equals(reqBody.phoneNumber);
     });
 
     it("Should register courier successfully without phone number", async function () {
@@ -62,19 +52,13 @@ describe("auth route", function () {
       const response = await auth("signup", reqBody, 201);
       const data = response.body;
 
-      expect(data.message).equals("Courier registered successfully");
+      expect(data.courier).to.not.be.null;
+      expect(data.token).to.not.be.null;
 
-      const couriers = await Courier.findAll({
-        where: {
-          firstName: reqBody.firstName,
-          lastName: reqBody.lastName,
-          email: reqBody.email,
-        },
-        include: Setting,
-      });
-
-      expect(couriers.length).equals(1);
-      expect(couriers[0].phoneNumber).is.null;
+      expect(data.courier.firstName).equals(reqBody.firstName);
+      expect(data.courier.lastName).equals(reqBody.lastName);
+      expect(data.courier.email).equals(reqBody.email);
+      expect(data.courier.phoneNumber).to.be.null;
     });
 
     it("Should fail to register courier without email", async function () {
@@ -99,10 +83,10 @@ describe("auth route", function () {
         password: faker.internet.password(),
       };
       await auth("signup", reqBody, 201);
-      const response = await auth("signup", reqBody, 200);
+      const response = await auth("signup", reqBody, 409);
       const data = response.body;
 
-      expect(data.message).equals("Courier already exists");
+      expect(data.error).equals(`Courier with email ${reqBody.email} already exists`);
     });
   });
 
@@ -128,7 +112,10 @@ describe("auth route", function () {
       );
       const data = response.body;
 
-      expect(data.token).not.null;
+       expect(data.courier).to.not.be.null;
+       expect(data.token).to.not.be.null;
+
+       expect(data.courier.email).equals(reqBody.email);
     });
 
     it("Should fail to login in courier with wrong password", async function () {

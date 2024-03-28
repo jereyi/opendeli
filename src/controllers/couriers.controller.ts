@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import Courier from "../models/courier.model";
 import {
-  CouriersReqBody,
-  ProfileReqBody,
+  GetCouriersReqBody,
+  UpdateCourierReqBody,
   SettingsReqBody,
 } from "../reqBodies/couriers";
 import Setting from "../models/setting.model";
@@ -14,7 +14,7 @@ var db = require("../models/db"),
 
 // TODO: Test use delivery polygon flag in Postman
 export async function getCouriers(
-  req: Request<{}, {}, CouriersReqBody>,
+  req: Request<{}, {}, GetCouriersReqBody>,
   res: Response
 ) {
   try {
@@ -31,7 +31,7 @@ export async function getCouriers(
       baseQuery = `SELECT * FROM "couriers"`;
     }
     const deliveryPolygonQuery = `ST_Intersects(ST_SetSRID(ST_MakePoint(:latitude, :longitude), 4326), "deliveryPolygon")`;
-    const isAvailableQuery = `status = 'online' OR status = 'last_call'`;
+    const isAvailableQuery = `status = 'online'`;
     const sortByDistanceQuery = "ORDER BY distance ASC";
 
     if (useDeliveryPolygon) {
@@ -50,8 +50,10 @@ export async function getCouriers(
       model: Courier,
       type: QueryTypes.SELECT,
     });
-  
-    res.status(200).json({ couriers: rows.map((courier: Courier) => courier.dataValues) });
+
+    res
+      .status(200)
+      .json({ couriers: rows.map((courier: Courier) => courier.dataValues) });
   } catch (error) {
     console.error("getCouriers:", error);
     res.status(500).json({ error: "Error fetching couriers" });
@@ -67,47 +69,50 @@ export async function getCourier(req: Request<{ id: string }>, res: Response) {
       console.log("datavals", courier.dataValues)
       res.status(200).json({ courier: courier.dataValues });
     } else {
-      res.status(404).json({ message: "Courier not found" });
+      res.status(404).json({ error: "Courier not found" });
     }
   } catch (error) {
+    console.log("getCourier: Courier not found");
     console.error("getCourier:", error);
     res.status(500).json({ error: "Error fetching courier" });
   }
 }
 
-export async function updateCourierProfile(
-  req: Request<{ id: string }, {}, ProfileReqBody>,
+export async function updateCourier(
+  req: Request<{ id: string }, {}, UpdateCourierReqBody>,
   res: Response
 ) {
   try {
     const id = req.params.id;
-    const { firstName, lastName, email, phoneNumber } = req.body;
+    const { firstName, lastName, email, phoneNumber, status, orderSetting, currentLocation } = req.body;
+
+    console.log("updateCourier request", req.params, req.body)
 
     const updates: any = {};
     if (firstName) updates.firstName = firstName;
     if (lastName) updates.lastName = lastName;
     if (email) updates.email = email;
-    if (phoneNumber) updates.phoneNumber;
-    // if (profilePicture) {
-    //   updates.imageType = profilePicture.type;
-    //   updates.imageName = profilePicture.name;
-    //   updates.imageData = await profilePicture.arrayBuffer();
-    // }
+    if (phoneNumber) updates.phoneNumber = phoneNumber;
+    if (status) updates.status = status;
+    if (orderSetting) updates.orderSetting = orderSetting;
+    if (currentLocation) updates.currentLocation = currentLocation;
 
-    const [affectedRows] = await Courier.update(updates, {
+    const [affectedCount, affectedRows] = await Courier.update(updates, {
       where: {
         id,
       },
+      returning: true
     });
 
-    if (affectedRows > 0) {
-      res.status(200).json({ message: "Profile updated successfully" });
+    if (affectedCount > 0) {
+      res.status(200).json({ courier: affectedRows[0].dataValues });
     } else {
-      res.status(404).json({ message: "Courier not found" });
+      console.log("updateCourier: Courier not found");
+      res.status(404).json({ error: "Courier not found" });
     }
   } catch (error) {
-    console.error("getCourierProfile:", error);
-    res.status(500).json({ error: "Error updating profile" });
+    console.error("updateCourier:", error);
+    res.status(500).json({ error: "Error updating courier" });
   }
 }
 
@@ -120,16 +125,15 @@ export async function getCourierFullSettings(req: Request, res: Response) {
       console.log("Courier settings fetched successfully");
       res.status(200).json({ settings: courier.Setting?.dataValues});
     } else {
-      console.log("Courier not found")
+      console.log("getCourierFullSettings: Courier not found");
       res.status(404).json({ message: "Courier not found" });
     }
   } catch (error) {
-    console.error(error);
+    console.error("getCourierFullSettings:", error);
     res.status(500).json({ error: "Error fetching courier setting" });
   }
 }
 
-// TODO: Test this method in Postman
 export async function updateCourierFullSettings(
   req: Request<{ id: string }, {}, SettingsReqBody>,
   res: Response
@@ -181,110 +185,15 @@ export async function updateCourierFullSettings(
         console.log("Settings updated successfully");
         res.status(200).json({ settings: rows[0].dataValues });
       } else {
-        console.log("Error updating courier setting");
+        console.log("updateCourierFullSettings: Error updating courier setting");
         res.status(500).json({ message: "Error updating courier setting" });
       }
     } else {
-      console.log("Courier not found");
+      console.log("updateCourierFullSettings: Courier not found");
       res.status(404).json({ message: "Courier not found" });
     }
   } catch (error) {
     console.error("updateCourierFullSettings:", error);
     res.status(500).json({ error: "Error updating courier setting" });
-  }
-}
-
-export async function updateCourierStatus(
-  req: Request<{ id: string }, {}, { status: UserStatus }>,
-  res: Response
-) {
-  try {
-    const id = req.params.id;
-    const { status } = req.body;
-
-    console.log(status)
-
-    const [affectedCount, affectedRows] = await Courier.update(
-      { status },
-      {
-        where: {
-          id,
-        },
-        returning: true,
-      }
-    );
-
-    if (affectedCount > 0) {
-      console.log("Status updated successfully");
-      res.status(200).json({ courier: affectedRows[0].dataValues});
-    } else {
-      console.log("Courier not found");
-      res.status(404).json({ message: "Courier not found" });
-    }
-  } catch (error) {
-    console.error("updateCourierStatus:", error);
-    res.status(500).json({ error: "Error updating status" });
-  }
-}
-
-export async function updateCourierOrderSetting(
-  req: Request<{ id: string }, {}, { orderSetting: OrderSetting }>,
-  res: Response
-) {
-  try {
-    const id = req.params.id;
-    const { orderSetting } = req.body;
-
-    const [affectedCount, affectedRows] = await Courier.update(
-      { orderSetting },
-      {
-        where: {
-          id,
-        },
-        returning: true
-      }
-    );
-
-    if (affectedCount > 0) {
-      res.status(200).json({ courier: affectedRows[0].dataValues});
-    } else {
-      console.log("Courier not found")
-      res.status(404).json({ message: "Courier not found" });
-    }
-  } catch (error) {
-    console.error("updateCourierOrderSetting:", error);
-    res.status(500).json({ error: "Error updating order setting" });
-  }
-}
-
-// NOTE: Current location must be specified in geoJson format (https://geojson.org/geojson-spec.html)
-export async function updateCourierCurrentLocation(
-  req: Request<{ id: string }, {}, { currentLocation: Point }>,
-  res: Response
-) {
-  try {
-    const id = req.params.id;
-    const { currentLocation } = req.body;
-
-
-    const [affectedRows] = await Courier.update(
-      { currentLocation },
-      {
-        where: {
-          id,
-        },
-      }
-    );
-
-    if (affectedRows > 0) {
-      res
-        .status(200)
-        .json({ message: "Current location updated successfully" });
-    } else {
-      res.status(404).json({ message: "Courier not found" });
-    }
-  } catch (error) {
-    console.error("updateCourierCurrentLocation:", error);
-    res.status(500).json({ error: "Error updating current location" });
   }
 }

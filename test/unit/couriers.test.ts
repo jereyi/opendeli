@@ -23,59 +23,20 @@ import {
   OrderPreferences,
   OrderSetting,
   RestaurantTypes,
+  UserStatus,
   VehicleType,
 } from "../../src/utils/enum.util";
 import { auth } from "./auth.test";
 import Setting from "../../src/models/setting.model";
 import { SettingsReqBody } from "../../src/reqBodies/couriers";
 import { EarningGoals, PayRate } from "../../src/utils/types.util";
+import { person1, person2, person3 } from "./utils/testData";
+import { createPoint, createPolygon } from "./utils/helper";
 
 let courier1: Courier;
 let courier2: Courier;
 let courier3: Courier;
 let setting1: Setting;
-const person1 = {
-  firstName: faker.person.firstName(),
-  lastName: faker.person.lastName(),
-  email: "",
-  password: faker.internet.password(),
-  phoneNumber: faker.phone.number(),
-  isAvailable: true,
-  orderSetting: OrderSetting[0] as unknown as OrderSetting,
-  currentLocation: { type: "Point", coordinates: [300.0, 0.0] } as Point,
-};
-person1.email = faker.internet.email({
-  firstName: person1.firstName,
-  lastName: person1.lastName,
-});
-const person2 = {
-  firstName: faker.person.firstName(),
-  lastName: faker.person.lastName(),
-  email: "",
-  password: faker.internet.password(),
-  phoneNumber: faker.phone.number(),
-  isAvailable: true,
-  orderSetting: OrderSetting[1] as unknown as OrderSetting,
-  currentLocation: { type: "Point", coordinates: [200.0, 0.0] } as Point,
-};
-person2.email = faker.internet.email({
-  firstName: person2.firstName,
-  lastName: person2.lastName,
-});
-const person3 = {
-  firstName: faker.person.firstName(),
-  lastName: faker.person.lastName(),
-  email: "",
-  password: faker.internet.password(),
-  phoneNumber: faker.phone.number(),
-  isAvailable: false,
-  orderSetting: OrderSetting[2] as unknown as OrderSetting,
-  currentLocation: { type: "Point", coordinates: [100.0, 0.0] } as Point,
-};
-person3.email = faker.internet.email({
-  firstName: person3.firstName,
-  lastName: person3.lastName,
-});
 
 describe("couriers route", function () {
   let token: string;
@@ -125,7 +86,7 @@ describe("couriers route", function () {
     it("Should get couriers and sort them by distance", async function () {
       const reqBody = {
         sortByDistance: true,
-        location: { type: "Point", coordinates: [0.0, 0.0] } as Point,
+        location: createPoint(0.0, 0.0),
       };
       const response = await get("", token, 200, reqBody);
       const data = response.body;
@@ -150,9 +111,9 @@ describe("couriers route", function () {
       const response = await get("", token, 200, reqBody);
       const data = response.body;
 
-      expect(data.couriers.length).equals(2);
+      expect(data.couriers.length).equals(1);
       expect(data.couriers).to.eql(
-        [courier1.dataValues, courier2.dataValues].map((dataValues) => ({
+        [courier2.dataValues].map((dataValues) => ({
           ...dataValues,
           createdAt: dataValues["createdAt"].toJSON(),
           updatedAt: dataValues["updatedAt"].toJSON(),
@@ -160,6 +121,7 @@ describe("couriers route", function () {
       );
     });
   });
+
   describe("GET /:id", function () {
     it("Should get logged in courier", async function () {
       const response = await get(courier1.id, token, 200);
@@ -176,68 +138,69 @@ describe("couriers route", function () {
     });
   });
 
-  describe("PATCH /profile/:id", function () {
-    it("Should update courier profile", async function () {
-      const reqBody = {
-        firstName: faker.person.firstName(),
-        lastName: faker.person.lastName(),
-      };
-      const response = await patch(
-        `profile/${courier1.id}`,
-        token,
-        200,
-        reqBody
-      );
+   describe("PATCH /:id", function () {
+     it("Should update courier order settings", async function () {
+       const reqBody = {
+         orderSetting: OrderSetting.manual,
+       };
+       await patch(`${courier1.id}`, token, 200, reqBody);
 
-      const expectedCourier = await Courier.findByPk(courier1.id);
-      expect(expectedCourier).not.to.be.null;
-      expect(expectedCourier?.firstName).to.eql(reqBody.firstName);
-      expect(expectedCourier?.lastName).to.eql(reqBody.lastName);
-    });
-  });
-  describe("GET /profile/:id", function () {
-    it("Should update courier profile", async function () {
-      const reqBody = {
-        firstName: faker.person.firstName(),
-        lastName: faker.person.lastName(),
-      };
-      await patch(`profile/${courier1.id}`, token, 200, reqBody);
+       const courier = await Courier.findByPk(courier1.id);
 
-      const updatedCourier = await Courier.findByPk(courier1.id);
-      expect(updatedCourier).not.to.be.null;
-      expect(updatedCourier?.firstName).to.eql(reqBody.firstName);
-      expect(updatedCourier?.lastName).to.eql(reqBody.lastName);
-    });
-  });
+       expect(courier).not.to.be.null;
+       expect(courier?.orderSetting).to.eql("manual");
+     });
+     it("Should update courier status", async function () {
+       const reqBody = {
+         status: UserStatus.offline,
+       };
+       await patch(`${courier1.id}`, token, 200, reqBody);
+
+       const courier = await Courier.findByPk(courier1.id);
+       expect(courier).not.to.be.null;
+       expect(courier?.status).to.eql(UserStatus.offline);
+     });
+     it("Should get courier current location", async function () {
+       const reqBody = {
+         currentLocation: createPoint(600.0, 0.0),
+       };
+       const data = await patch(`${courier1.id}`, token, 200, reqBody);
+
+       const courier = await Courier.findByPk(courier1.id);
+       expect(courier).not.to.be.null;
+       expect(courier?.currentLocation?.type).to.eql(
+         reqBody.currentLocation.type
+       );
+       expect(courier?.currentLocation?.coordinates).to.eql(
+         reqBody.currentLocation.coordinates
+       );
+     });
+   });
+
   describe("GET /full-settings/:id", function () {
     it("Should get courier full settings", async function () {
-      const data = (await get(`full-settings/${courier1.id}`, token, 200)).body;
+      const { settings } = (await get(`full-settings/${courier1.id}`, token, 200)).body;
 
-      console.log("setting", data.setting);
-      const expectedSetting = {
+      console.log("settings", settings);
+      const expectedSettings = {
         ...setting1.dataValues,
         createdAt: setting1.dataValues["createdAt"].toJSON(),
         updatedAt: setting1.dataValues["updatedAt"].toJSON(),
       };
-      expect(data.setting).not.to.be.null;
-      expect(data.setting).to.eql(expectedSetting);
+      expect(settings).not.to.be.null;
+      expect(settings).to.eql(expectedSettings);
     });
   });
   describe("PATCH /full-settings/:id", function () {
     it("Should update courier full settings", async function () {
       const reqBody: SettingsReqBody = {
-        deliveryPolygon: {
-          type: "Polygon",
-          coordinates: [
-            [
-              [-100.0, 100.0],
-              [100.0, 100.0],
-              [100.0, -100.0],
-              [-100.0, -100.0],
-            ],
-          ],
-        },
-        vehicleType: "motorcycle" as unknown as VehicleType,
+        deliveryPolygon: createPolygon([
+          [-100.0, 100.0],
+          [100.0, 100.0],
+          [100.0, -100.0],
+          [-100.0, -100.0],
+        ]),
+        vehicleType: VehicleType.motorcycle,
         preferredAreas: ["New York, NY", "Princeton, NJ", "Philidephia, PA"],
         // Note: Day is arbitrary, only time is relevant
         shiftAvailability: {
@@ -266,22 +229,22 @@ describe("couriers route", function () {
           ],
         },
         orderPreferences: [
-          "small_orders",
-          "medium_orders",
-        ] as unknown as OrderPreferences[],
-        foodPreferences: ["cold"] as unknown as FoodPreferences[],
+          OrderPreferences.small_orders,
+          OrderPreferences.medium_orders,
+        ],
+        foodPreferences: [FoodPreferences.cold],
         earningGoals: { daily: 100, weekly: 500 } as EarningGoals,
-        deliverySpeed: "rush" as unknown as DeliverySpeed,
-        restaurantTypes: ["local"] as unknown as RestaurantTypes[],
+        deliverySpeed: DeliverySpeed.rush,
+        restaurantTypes: [RestaurantTypes.local],
         cuisineTypes: [
-          "american",
-          "mediterranean",
-        ] as unknown as CuisineTypes[],
+          CuisineTypes.american,
+          CuisineTypes.mediterranean,
+        ],
         preferredRestaurantPartners: ["Sweetgreen", "Cava"],
         dietaryRestrictions: [
-          "vegan",
-          "organic",
-        ] as unknown as DietaryRestrictions[],
+          DietaryRestrictions.vegan,
+          DietaryRestrictions.organic,
+        ],
         payRate: {
           hourlyRate: 15,
           perDeliveryRate: 5,
@@ -290,36 +253,31 @@ describe("couriers route", function () {
           minimumEarningsGuarantee: 50,
         } as PayRate,
       };
-      const data = (
+      const { settings } = (
         await patch(`full-settings/${courier1.id}`, token, 200, reqBody)
       ).body;
 
-      console.log("setting", data.setting);
-      const courier = await Courier.findByPk(courier1.id, {
-        include: Setting,
-      });
-      const expectedSetting = courier?.Setting?.dataValues;
-      console.log(courier?.Setting?.dataValues);
-      expect(expectedSetting).not.to.be.null;
-      expect(expectedSetting?.vehicleType).to.eql(reqBody.vehicleType);
-      expect(expectedSetting?.deliveryPolygon?.coordinates).to.eql(
+      console.log("settings", settings);
+      expect(settings).not.to.be.null;
+      expect(settings?.vehicleType).to.eql(reqBody.vehicleType);
+      expect(settings?.deliveryPolygon?.coordinates).to.eql(
         reqBody.deliveryPolygon?.coordinates
       );
-      expect(expectedSetting?.restaurantTypes).to.eql(reqBody.restaurantTypes);
-      expect(expectedSetting?.earningGoals).to.eql(reqBody.earningGoals);
-      expect(expectedSetting?.cuisineTypes).to.eql(reqBody.cuisineTypes);
-      expect(expectedSetting?.deliverySpeed).to.eql(reqBody.deliverySpeed);
-      expect(expectedSetting?.preferredRestaurantPartners).to.eql(
+      expect(settings?.restaurantTypes).to.eql(reqBody.restaurantTypes);
+      expect(settings?.earningGoals).to.eql(reqBody.earningGoals);
+      expect(settings?.cuisineTypes).to.eql(reqBody.cuisineTypes);
+      expect(settings?.deliverySpeed).to.eql(reqBody.deliverySpeed);
+      expect(settings?.preferredRestaurantPartners).to.eql(
         reqBody.preferredRestaurantPartners
       );
-      expect(expectedSetting?.orderPreferences).to.eql(
+      expect(settings?.orderPreferences).to.eql(
         reqBody.orderPreferences
       );
-      expect(expectedSetting?.payRate).to.eql(reqBody.payRate);
-      expect(expectedSetting?.dietaryRestrictions).to.eql(
+      expect(settings?.payRate).to.eql(reqBody.payRate);
+      expect(settings?.dietaryRestrictions).to.eql(
         reqBody.dietaryRestrictions
       );
-      expect(expectedSetting?.foodPreferences).to.eql(reqBody.foodPreferences);
+      expect(settings?.foodPreferences).to.eql(reqBody.foodPreferences);
       const expectedShiftAvailability = {
         sunday: reqBody.shiftAvailability?.sunday.map((dates) =>
           dates.map((date) => date.toJSON())
@@ -343,53 +301,13 @@ describe("couriers route", function () {
           dates.map((date) => date.toJSON())
         ),
       };
-      expect(expectedSetting?.shiftAvailability).to.eql(
+      expect(settings?.shiftAvailability).to.eql(
         expectedShiftAvailability
       );
-      expect(expectedSetting?.preferredAreas).to.eql(reqBody.preferredAreas);
+      expect(settings?.preferredAreas).to.eql(reqBody.preferredAreas);
     });
   });
-  describe("PATCH /order-settings/:id", function () {
-    it("Should update courier order settings", async function () {
-      const reqBody = {
-        orderSetting: "manual" as unknown as OrderSetting,
-      };
-      await patch(`order-settings/${courier1.id}`, token, 200, reqBody);
-
-      const courier = await Courier.findByPk(courier1.id);
-
-      expect(courier).not.to.be.null;
-      expect(courier?.orderSetting).to.eql("manual");
-    });
-  });
-  describe("PATCH /availability/:id", function () {
-    it("Should update courier availability", async function () {
-      const reqBody = {
-        isAvailable: false,
-      };
-      await patch(`availability/${courier1.id}`, token, 200, reqBody);
-
-      const courier = await Courier.findByPk(courier1.id);
-      expect(courier).not.to.be.null;
-      expect(courier?.isAvailable).to.eql(false);
-    });
-  });
-  describe("PATCH /current-location/:id", function () {
-      it("Should get courier current location", async function () {
-        const reqBody = {
-          currentLocation: {
-            type: "Point",
-            coordinates: [600.0, 0.0],
-          } as Point,
-        };
-          const data = await patch(`current-location/${courier1.id}`, token, 200, reqBody);
-
-      const courier = await Courier.findByPk(courier1.id);
-      expect(courier).not.to.be.null;
-      expect(courier?.currentLocation?.coordinates).to.eql(reqBody.currentLocation.coordinates);
-    });
-  });
-    
+ 
   async function get(
     path: string,
     token: string,
@@ -403,7 +321,7 @@ describe("couriers route", function () {
       .set("Authorization", "Bearer " + token)
       .expect(status);
     return response;
-    };
+  }
   async function patch(
     path: string,
     token: string,
@@ -417,6 +335,5 @@ describe("couriers route", function () {
       .set("Authorization", `Bearer ${token}`)
       .expect(status);
     return response;
-    };
+  }
 });
-

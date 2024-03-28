@@ -1,82 +1,82 @@
 // COURIER MODEL
 export enum OrderSetting {
-  "auto_accept",
-  "auto_reject",
-  "manual",
+  auto_accept = "auto_accept",
+  auto_reject = "auto_reject",
+  manual = "manual",
 }
 
 // SETTINGS MODEL
 export enum VehicleType {
-  "bicycle",
-  "motorcycle",
-  "car",
-  "scooter",
-  "on_foot",
+  bicycle = "bicycle",
+  motorcycle = "motorcycle",
+  car = "car",
+  scooter = "scooter",
+  on_foot = "on_foot",
 }
 export enum RestaurantTypes {
-  "local",
-  "chain",
-  "black_owned",
-  "women_owned",
-  "franchise",
-  'upscale',
-  "fast_casual",
-  "food_trucks",
-  "vegan_vegetarian",
+  local = "local",
+  chain = "chain",
+  black_owned = "black_owned",
+  women_owned = "women_owned",
+  franchise = "franchise",
+  upscale = 'upscale',
+  fast_casual = "fast_casual",
+  food_trucks = "food_trucks",
+  vegan_vegetarian = "vegan_vegetarian",
 }
 export enum OrderPreferences {
-  "small_orders",
-  "medium_orders",
-  "large_orders",
+  small_orders = "small_orders",
+  medium_orders = "medium_orders",
+  large_orders = "large_orders",
 }
 export enum FoodPreferences {
-  "hot",
-  "cold",
-  "fragile",
+  hot = "hot",
+  cold = "cold",
+  fragile = "fragile",
 }
 
 export enum DeliverySpeed {
-  "regular",
-  "rush",
+  regular = "regular",
+  rush = "rush",
 }
 
 export enum CuisineTypes {
-  "american",
-  "italian",
-  "mexican",
-  "chinese",
-  "japanese",
-  "indian",
-  "mediterranean",
-  "thai",
-  "french",
-  "korean",
-  "vietnamese",
-  "middle_eastern",
-  "african",
-  "caribbean",
+  american = "american",
+  italian = "italian",
+  mexican = "mexican",
+  chinese = "chinese",
+  japanese = "japanese",
+  indian = "indian",
+  mediterranean = "mediterranean",
+  thai = "thai",
+  french = "french",
+  korean = "korean",
+  vietnamese = "vietnamese",
+  middle_eastern = "middle_eastern",
+  african = "african",
+  carribean = "caribbean",
 }
 
 export enum DietaryRestrictions {
-  "vegan",
-  "vegetarian",
-  "halal",
-  "kosher",
-  "organic",
-  "alcohol_free",
+  vegan = "vegan",
+  vegetarian = "vegetarian",
+  halal = "halal",
+  kosher = "kosher",
+  organic = "organic",
+  alcohol_free = "alcohol_free",
 }
 
 // ORDER MODEL
 export enum OrderStatus {
-  "created",
-  "dispatched",
-  "picked_up",
-  "dropped_off",
-  "canceled",
+  created = "created",
+  dispatched = "dispatched",
+  picked_up = "picked_up",
+  dropped_off = "dropped_off",
+  canceled = "canceled",
 }
 
 export enum UserStatus {
-  "online",
-  "offline",
-  "last_call",
+  online = "online",
+  offline = "offline",
+  last_call = "last_call",
 }
