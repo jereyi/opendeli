@@ -3,6 +3,8 @@ import Order from "../models/order.model";
 import { OrderStatus } from "../utils/enum.util";
 import { GetOffersReqBody } from "../reqBodies/offers";
 import Courier from "../models/courier.model";
+import Merchant from "../models/merchant.model";
+import { Op } from "sequelize";
 var db = require("../models/db"),
   sequelize = db.sequelize;
 
@@ -12,27 +14,39 @@ export async function getOffers(
   res: Response
 ) {
   try {
-    const { merchantIds, deliveryTime, timeOperator } = req.body;
+    const {
+      merchantIds,
+      deliveryTime,
+      timeOperator,
+      excludedIds,
+      includeMerchant,
+    } = req.body;
 
     const where: any = {
       CourierId: null,
       status: "created",
     };
 
-    if (merchantIds) {
-      where.MerchantId = { in: merchantIds };
+    if (merchantIds && merchantIds.length > 0) {
+      where.MerchantId = { [Op.in]: merchantIds };
+    }
+
+    if (excludedIds && excludedIds.length > 0) {
+      where.id = {
+        [Op.notIn]: excludedIds,
+      };
     }
 
     if (deliveryTime) {
       switch (timeOperator) {
         case "between":
-          where.deliveryTime = { between: deliveryTime };
+          where.deliveryTime = { [Op.between]: deliveryTime };
           break;
         case "before":
-          where.deliveryTime = { lt: deliveryTime[0] };
+          where.deliveryTime = { [Op.lt]: deliveryTime[0] };
           break;
         case "after":
-          where.deliveryTime = { gt: deliveryTime[0] };
+          where.deliveryTime = { [Op.gt]: deliveryTime[0] };
           break;
         default: // at
           where.deliveryTime = deliveryTime[0];
@@ -40,11 +54,14 @@ export async function getOffers(
       }
       where.deliveryTime = deliveryTime;
     }
-    const offers = await Order.findAll({
+    const rows = await Order.findAll({
       where,
+      include: includeMerchant ? Merchant : undefined,
     });
 
-    res.status(200).json({ offers });
+    res
+      .status(200)
+      .json({ offers: rows.map((offer: Order) => offer.dataValues) });
   } catch (error) {
     console.error("getOffers:", error);
     res.status(500).json({ error: "Error fetching offers" });
@@ -74,7 +91,7 @@ export async function acceptOffer(
   try {
     const id = req.params.id;
     const { courierId } = req.body;
-
+    console.log("accept offer request params and body: ", req.params, req.body);
     const courier = await Courier.findByPk(courierId);
     if (!courier) {
       res.status(404).json({ message: "Courier not found" });
@@ -115,7 +132,20 @@ export async function rejectOffer(
     const id = req.params.id;
     const { courierId } = req.body;
 
-    const [affectedRows] = await Courier.update(
+    console.log("reject offer request params and body: ", req.params, req.body);
+    let courier = await Courier.findByPk(courierId);
+
+    if (!courier) {
+      console.log("Courier not found");
+      res.status(404).json({ message: "Courier not found" });
+    }
+
+    if (courier!.rejectedOffers.findIndex((offerId) => offerId == id) != -1) {
+      console.log("Offer has already been rejected");
+      res.status(400).json({ message: "Offer has already been rejected" });
+    }
+
+    const [_, affectedRows] = await Courier.update(
       {
         rejectedOffers: sequelize.fn(
           "array_append",
@@ -124,15 +154,13 @@ export async function rejectOffer(
         ),
       },
       {
-        where: { id: courierId },
+        where: { id: courierId},
+        returning: true,
       }
     );
 
-    if (affectedRows) {
-      res.status(200).json({ message: "Offer rejected successfully" });
-    } else {
-      res.status(404).json({ message: "Courier not found" });
-    }
+    console.log("Offer rejected successfully");
+    res.status(200).json({ courier: affectedRows[0].dataValues });
   } catch (error) {
     console.error("rejectOffer:", error);
     res.status(500).json({ error: "Error fetching offer" });

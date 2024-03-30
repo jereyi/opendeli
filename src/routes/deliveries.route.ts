@@ -18,7 +18,7 @@ import {
 } from "../controllers/deliveries.controller";
 import { verifyToken } from "../middlewares/auth.middleware";
 
-router.get("/", verifyToken, getDeliveries);
+router.post("/", verifyToken, getDeliveries);
 
 router.get("/:id", verifyToken, getDelivery);
 

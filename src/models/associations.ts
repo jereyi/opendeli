@@ -39,7 +39,7 @@ Comment.belongsTo(Merchant, {
 });
 
 Merchant.hasMany(Order);
-Order.belongsTo(Merchant);
+Order.hasOne(Merchant);
 
 Comment.hasMany(Comment, {
   sourceKey: "id",

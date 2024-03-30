@@ -24,13 +24,12 @@ export type PayRate = {
 
 export type Item = {
   name: string;
-  quantity: number;
-  size: "small" | "medium" | "large";
+  quantity?: number;
+  size?: "small" | "medium" | "large";
   price: number;
-  length: number;
-  width: number;
-  height: number;
-  weight: number;
-  keepUpright: boolean;
-  confirmed: boolean;
+  length?: number;
+  width?: number;
+  height?: number;
+  weight?: number;
+  keepUpright?: boolean;
 };

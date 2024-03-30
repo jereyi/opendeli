@@ -6,6 +6,8 @@ import {
   GetDeliveriesReqBody,
   IssueReqBody,
 } from "../reqBodies/deliveries";
+import { Op } from "sequelize";
+import Merchant from "../models/merchant.model";
 
 // Allow filtering by merchant, courier, status, delivery time
 export async function getDeliveries(
@@ -13,43 +15,43 @@ export async function getDeliveries(
   res: Response
 ) {
   try {
-    const { merchantIds, courierIds, statuses, deliveryTime, timeOperator } =
+    const { merchantIds, courierIds, statuses, deliveryTime, timeOperator, includeMerchant} =
       req.body;
 
     const where: any = {};
 
     if (merchantIds) {
-      where.MerchantId = { in: merchantIds };
+      where.MerchantId = { [Op.in]: merchantIds };
     }
 
-    where.CourierId = courierIds ? { in: courierIds } : { not: null };
+    where.CourierId = courierIds ? { [Op.in]: courierIds } : { [Op.not]: null };
 
     where.status = statuses
-      ? { in: statuses }
-      : { not: OrderStatus["created"] };
+      ? { [Op.in]: statuses }
+      : { [Op.not]: OrderStatus["created"] };
 
     if (deliveryTime) {
       switch (timeOperator) {
         case "between":
-          where.deliveryTime = { between: deliveryTime };
+          where.deliveryTime = { [Op.between]: deliveryTime };
           break;
         case "before":
-          where.deliveryTime = { lt: deliveryTime[0] };
+          where.deliveryTime = { [Op.lt]: deliveryTime[0] };
           break;
         case "after":
-          where.deliveryTime = { gt: deliveryTime[0] };
+          where.deliveryTime = { [Op.gt]: deliveryTime[0] };
           break;
         default: // at
           where.deliveryTime = deliveryTime[0];
           break;
       }
-      where.deliveryTime = deliveryTime;
     }
     const deliveries = await Order.findAll({
       where,
+      include: includeMerchant ? Merchant : undefined,
     });
-
-    res.status(200).json({ deliveries });
+    console.log("Fetched deliveries successfully", deliveries);
+    res.status(200).json({ deliveries: deliveries.map(delivery => delivery.dataValues) });
   } catch (error) {
     console.error("getDeliveries:", error);
     res.status(500).json({ error: "Error fetching deliveries" });

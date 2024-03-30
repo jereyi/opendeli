@@ -1,4 +1,4 @@
-import { CreationOptional, DataTypes, ForeignKey, InferAttributes, InferCreationAttributes, Model } from "sequelize";
+import { Association, BelongsToCreateAssociationMixin, BelongsToGetAssociationMixin, BelongsToSetAssociationMixin, CreationOptional, DataTypes, ForeignKey, HasOneCreateAssociationMixin, HasOneGetAssociationMixin, HasOneSetAssociationMixin, InferAttributes, InferCreationAttributes, Model, NonAttribute } from "sequelize";
 import { OrderStatus } from "../utils/enum.util";
 import { Point } from "geojson";
 import { Item } from "../utils/types.util";
@@ -8,12 +8,11 @@ var db = require("./db"),
   sequelize = db.sequelize;
 
 class Order extends Model<
-  InferAttributes<Order>,
-  InferCreationAttributes<Order>
-  > {
+  InferAttributes<Order, { omit: "Merchant"}>,
+  InferCreationAttributes<Order, { omit: "Merchant"}>
+> {
   declare id: CreationOptional<string>;
   declare CourierId: ForeignKey<Courier["id"]> | null;
-  declare MerchantId: ForeignKey<Merchant["id"]> | null;
   declare customerName: string;
   declare status: OrderStatus;
   declare customerNotes: string[];
@@ -35,6 +34,16 @@ class Order extends Model<
   declare deliveryTime: CreationOptional<Date>;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
+
+  declare getMerchant: HasOneGetAssociationMixin<Merchant>;
+  declare setMerchant: HasOneSetAssociationMixin<Merchant, string>;
+  declare createMerchant: HasOneCreateAssociationMixin<Merchant>;
+
+  declare Merchant?: NonAttribute<Merchant>;
+
+  declare static associations: {
+    Merchant: Association<Courier, Merchant>;
+  };
 }
 
 Order.init(
@@ -98,21 +107,21 @@ Order.init(
     },
     // Total amount earned for this order (pay + fees)
     grossRevenue: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
     // Fees associated with the delivery of this order
     fees: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
     // Driver's compensation for this order (before tips)
     pay: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
     tips: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
       allowNull: false,
       defaultValue: 0,
     },

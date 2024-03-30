@@ -8,13 +8,13 @@ import {
 } from "../controllers/offers.controller";
 import { verifyToken } from "../middlewares/auth.middleware";
 
-router.get("/", verifyToken, getOffers);
+router.post("/", verifyToken, getOffers);
 
 router.get("/:id", verifyToken, getOffer);
 
-router.get("/accept/:id", verifyToken, acceptOffer);
+router.post("/accept/:id", verifyToken, acceptOffer);
 
-router.patch("/reject/:id", verifyToken, rejectOffer);
+router.post("/reject/:id", verifyToken, rejectOffer);
 
 
 

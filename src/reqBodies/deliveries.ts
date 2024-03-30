@@ -1,12 +1,13 @@
 import { OrderStatus } from "../utils/enum.util";
 
 export type GetDeliveriesReqBody = {
-    merchantIds?: string[];
-    courierIds?: string[];
-    statuses?: OrderStatus[];
-    deliveryTime?: Date[];
-    timeOperator?: "between" | "before" | "after" | "at";
-}
+  merchantIds?: string[];
+  courierIds?: string[];
+  statuses?: OrderStatus[];
+  deliveryTime?: Date[];
+  timeOperator?: "between" | "before" | "after" | "at";
+  includeMerchant?: boolean;
+};
 
 export type CourierNotesReqBody = {
     courierNotes?: string[];
