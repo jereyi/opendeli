@@ -11,6 +11,7 @@ import payoutsRouter from "./src/routes/payouts.route";
 import dotenv from "dotenv";
 import cors from "cors";
 import "./src/models/associations";
+//import "./src/models/populate_db";
 
 
 dotenv.config();
