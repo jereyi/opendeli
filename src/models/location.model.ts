@@ -29,20 +29,29 @@ import {
 } from "sequelize";
 import Merchant from "./merchant.model";
 import Comment from "./comment.model";
+import { StringColorFormat } from "@faker-js/faker";
 var db = require("./db"),
   sequelize = db.sequelize;
 
 // TODO: Verify on delete and on update
 class Location extends Model<
-  InferAttributes<Location, { omit: "Comments" | "Merchants" }>,
-  InferCreationAttributes<Location, { omit: "Comments" | "Merchants" }>
-> {
+  InferAttributes<Location, { omit: "Comments" }>,
+  InferCreationAttributes<Location, { omit: "Comments" }>
+  > {
+  // Use some reverse geocoding api to standardize these fields
   declare id: CreationOptional<string>;
-  declare address: string;
-  declare city: string;
+  declare addressLine1: string | null;
+  declare addressLine2: string | null;
+  declare city: string | null;
   declare state: string | null;
-  declare postalCode: string | null;
-  declare countryCode: string;
+  declare street: string | null;
+  declare houseNumber: string | null;
+  declare longitude: number;
+  declare latitude: number;
+  declare postCode: string | null;
+  declare stateCode: string | null;
+  declare countryCode: string | null;
+  declare formattedAddress: string | null;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 
@@ -55,25 +64,31 @@ class Location extends Model<
   declare hasComment: HasManyHasAssociationMixin<Comment, string>;
   declare hasComments: HasManyHasAssociationsMixin<Comment, string>;
   declare countComments: HasManyCountAssociationsMixin;
-  declare createComment: HasManyCreateAssociationMixin<Comment, "CommentableId">;
+  declare createComment: HasManyCreateAssociationMixin<
+    Comment,
+    "commentableId"
+  >;
 
-  declare getMerchants: BelongsToManyGetAssociationsMixin<Merchant>;
-  declare addMerchant: BelongsToManyAddAssociationMixin<Merchant, string>;
-  declare addMerchants: BelongsToManyAddAssociationsMixin<Merchant, string>;
-  declare setMerchants: BelongsToManySetAssociationsMixin<Merchant, string>;
-  declare removeMerchant: BelongsToManyRemoveAssociationMixin<Merchant, string>;
-  declare removeMerchants: BelongsToManyRemoveAssociationsMixin<Merchant, string>;
-  declare hasMerchant: BelongsToManyHasAssociationMixin<Merchant, string>;
-  declare hasMerchants: BelongsToManyHasAssociationsMixin<Merchant, string>;
-  declare countMerchants: BelongsToManyCountAssociationsMixin;
-  declare createMerchant: BelongsToManyCreateAssociationMixin<Merchant>;
+  // declare getMerchants: BelongsToManyGetAssociationsMixin<Merchant>;
+  // declare addMerchant: BelongsToManyAddAssociationMixin<Merchant, string>;
+  // declare addMerchants: BelongsToManyAddAssociationsMixin<Merchant, string>;
+  // declare setMerchants: BelongsToManySetAssociationsMixin<Merchant, string>;
+  // declare removeMerchant: BelongsToManyRemoveAssociationMixin<Merchant, string>;
+  // declare removeMerchants: BelongsToManyRemoveAssociationsMixin<
+  //   Merchant,
+  //   string
+  // >;
+  // declare hasMerchant: BelongsToManyHasAssociationMixin<Merchant, string>;
+  // declare hasMerchants: BelongsToManyHasAssociationsMixin<Merchant, string>;
+  // declare countMerchants: BelongsToManyCountAssociationsMixin;
+  // declare createMerchant: BelongsToManyCreateAssociationMixin<Merchant>;
 
   declare Comments?: NonAttribute<Comment[]>;
-  declare Merchants?: NonAttribute<Merchant[]>;
+  // declare Merchants?: NonAttribute<Merchant[]>;
 
   declare static associations: {
     Comments: Association<Location, Comment>;
-    Merchants: Association<Location, Merchant>;
+    // Merchants: Association<Location, Merchant>;
   };
 }
 Location.init(
@@ -84,36 +99,52 @@ Location.init(
       allowNull: false,
       defaultValue: DataTypes.UUIDV4,
     },
-    address: {
+    addressLine1: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
-    // City, Town, or Villange
+    addressLine2: {
+      type: DataTypes.STRING,
+    },
+    // City, Town, or Village
     city: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     // State, Province, or Prefecture
     state: {
       type: DataTypes.STRING,
     },
-    postalCode: {
+    street: {
+      type: DataTypes.STRING,
+    },
+    postCode: {
       type: DataTypes.STRING,
     },
     // ISO Alpha-2 Contry Code (eg. United States of America -> US)
     countryCode: {
       type: DataTypes.STRING,
-      allowNull: false,
+    },
+    stateCode: {
+      type: DataTypes.STRING,
+    },
+    houseNumber: {
+      type: DataTypes.STRING,
+    },
+    longitude: {
+      type: DataTypes.FLOAT,
+    },
+    latitude: {
+      type: DataTypes.FLOAT,
+    },
+    formattedAddress: {
+      type: DataTypes.STRING,
     },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
-      allowNull: false,
     },
     updatedAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
-      allowNull: false,
     },
   },
   {

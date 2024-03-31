@@ -35,8 +35,8 @@ var db = require("./db"),
 // TODO: Add indices, primary keys, and default
 // TODO: Fix associaitions
 class Merchant extends Model<
-  InferAttributes<Merchant, { omit: "Comments" | "Locations" }>,
-  InferCreationAttributes<Merchant, { omit: "Comments" | "Locations" }>
+  InferAttributes<Merchant, { omit: "Comments" }>,
+  InferCreationAttributes<Merchant, { omit: "Comments" }>
 > {
   declare id: CreationOptional<string>;
   declare name: string;
@@ -56,29 +56,29 @@ class Merchant extends Model<
   declare countComments: HasManyCountAssociationsMixin;
   declare createComment: HasManyCreateAssociationMixin<
     Comment,
-    "CommentableId"
+    "commentableId"
   >;
 
-  declare getLocations: BelongsToManyGetAssociationsMixin<Location>;
-  declare addLocation: BelongsToManyAddAssociationMixin<Location, string>;
-  declare addLocations: BelongsToManyAddAssociationsMixin<Location, string>;
-  declare setLocations: BelongsToManySetAssociationsMixin<Location, string>;
-  declare removeLocation: BelongsToManyRemoveAssociationMixin<Location, string>;
-  declare removeLocations: BelongsToManyRemoveAssociationsMixin<
-    Location,
-    string
-  >;
-  declare hasLocation: BelongsToManyHasAssociationMixin<Location, string>;
-  declare hasLocations: BelongsToManyHasAssociationsMixin<Location, string>;
-  declare countLocations: BelongsToManyCountAssociationsMixin;
-  declare createLocation: BelongsToManyCreateAssociationMixin<Location>;
+  // declare getLocations: BelongsToManyGetAssociationsMixin<Location>;
+  // declare addLocation: BelongsToManyAddAssociationMixin<Location, string>;
+  // declare addLocations: BelongsToManyAddAssociationsMixin<Location, string>;
+  // declare setLocations: BelongsToManySetAssociationsMixin<Location, string>;
+  // declare removeLocation: BelongsToManyRemoveAssociationMixin<Location, string>;
+  // declare removeLocations: BelongsToManyRemoveAssociationsMixin<
+  //   Location,
+  //   string
+  // >;
+  // declare hasLocation: BelongsToManyHasAssociationMixin<Location, string>;
+  // declare hasLocations: BelongsToManyHasAssociationsMixin<Location, string>;
+  // declare countLocations: BelongsToManyCountAssociationsMixin;
+  // declare createLocation: BelongsToManyCreateAssociationMixin<Location>;
 
   declare Comments?: NonAttribute<Comment[]>;
-  declare Locations?: NonAttribute<Location[]>;
+  // declare Locations?: NonAttribute<Location[]>;
 
   declare static associations: {
     Comments: Association<Location, Comment>;
-    Locations: Association<Location, Location>;
+    // Locations: Association<Location, Location>;
   };
 }
 
