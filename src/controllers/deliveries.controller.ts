@@ -8,6 +8,7 @@ import {
 } from "../reqBodies/deliveries";
 import { Op } from "sequelize";
 import Merchant from "../models/merchant.model";
+import Location from "../models/location.model";
 
 // Allow filtering by merchant, courier, status, delivery time
 export async function getDeliveries(
@@ -48,10 +49,17 @@ export async function getDeliveries(
     }
     const deliveries = await Order.findAll({
       where,
-      include: includeMerchant ? Merchant : undefined,
+      include: includeMerchant ? [Merchant, Location] : [Location],
     });
     console.log("Fetched deliveries successfully", deliveries);
-    res.status(200).json({ deliveries: deliveries.map(delivery => delivery.dataValues) });
+    res.status(200).json({
+      deliveries: deliveries.map((delivery) => ({
+        ...delivery.dataValues,
+        pickupLocation: delivery.getPickupLocation(),
+        dropoffLocation: delivery.getDropoffLocation(),
+        returnLocation: delivery.getReturnLocation(),
+      })),
+    });
   } catch (error) {
     console.error("getDeliveries:", error);
     res.status(500).json({ error: "Error fetching deliveries" });
@@ -61,10 +69,19 @@ export async function getDeliveries(
 export async function getDelivery(req: Request<{ id: string }>, res: Response) {
   try {
     const id = req.params.id;
-    const delivery = await Order.findByPk(id);
+    const delivery = await Order.findByPk(id, {
+      include: [Location],
+    });
 
     if (delivery) {
-      res.status(200).json({ delivery });
+      res.status(200).json({
+        delivery: {
+          ...delivery.dataValues,
+          pickupLocation: delivery.getPickupLocation(),
+          dropoffLocation: delivery.getDropoffLocation(),
+          returnLocation: delivery.getReturnLocation(),
+        },
+      });
     } else {
       res.status(404).json({ message: "Delivery not found" });
     }

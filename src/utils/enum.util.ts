@@ -80,3 +80,18 @@ export enum UserStatus {
   offline = "offline",
   last_call = "last_call",
 }
+
+export enum DeliveryType {
+  LeaveAtDoor = "leave_at_door",
+  MeetOutside = "meet_outside",
+  MeetInside = "meet_inside",
+  MeetAtDoor = "meet_at_door",
+  CallOnArrival = "call_on_arrival",
+}
+
+export enum PickupType {
+  LineupThirdPartyPickup = "line_up_pickup",
+  ParkThirdPartyLot = "park_in_lot",
+  DontOpenBags = `dont_open_bags`,
+  CallOnArrival = "call_on_arrival",
+}

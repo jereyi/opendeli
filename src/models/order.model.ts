@@ -1,24 +1,49 @@
-import { Association, BelongsToCreateAssociationMixin, BelongsToGetAssociationMixin, BelongsToSetAssociationMixin, CreationOptional, DataTypes, ForeignKey, HasOneCreateAssociationMixin, HasOneGetAssociationMixin, HasOneSetAssociationMixin, InferAttributes, InferCreationAttributes, Model, NonAttribute } from "sequelize";
-import { OrderStatus } from "../utils/enum.util";
+import {
+  Association,
+  BelongsToCreateAssociationMixin,
+  BelongsToGetAssociationMixin,
+  BelongsToSetAssociationMixin,
+  CreationOptional,
+  DataTypes,
+  ForeignKey,
+  HasManyAddAssociationMixin,
+  HasManyAddAssociationsMixin,
+  HasManyCountAssociationsMixin,
+  HasManyCreateAssociationMixin,
+  HasManyGetAssociationsMixin,
+  HasManyHasAssociationMixin,
+  HasManyHasAssociationsMixin,
+  HasManyRemoveAssociationMixin,
+  HasManyRemoveAssociationsMixin,
+  HasManySetAssociationsMixin,
+  HasOneCreateAssociationMixin,
+  HasOneGetAssociationMixin,
+  HasOneSetAssociationMixin,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+  NonAttribute,
+} from "sequelize";
+import { DeliveryType, OrderStatus, PickupType } from "../utils/enum.util";
 import { Point } from "geojson";
 import { Item } from "../utils/types.util";
 import Merchant from "./merchant.model";
 import Courier from "./courier.model";
+import Location from "./location.model";
 var db = require("./db"),
   sequelize = db.sequelize;
 
 class Order extends Model<
-  InferAttributes<Order, { omit: "Merchant"}>,
-  InferCreationAttributes<Order, { omit: "Merchant"}>
+  InferAttributes<Order, { omit: "Merchant" }>,
+  InferCreationAttributes<Order, { omit: "Merchant" }>
 > {
   declare id: CreationOptional<string>;
   declare CourierId: ForeignKey<Courier["id"]> | null;
   declare customerName: string;
+  declare customerPhoneNumber: string | null;
   declare status: OrderStatus;
   declare customerNotes: string[];
   declare courierNotes: string[];
-  declare pickupCoords: Point;
-  declare dropoffCoords: Point;
   declare items: Item[];
   declare undeliverableAction: string | null;
   declare undeliverableReason: string | null;
@@ -27,11 +52,14 @@ class Order extends Model<
   // https://stackoverflow.com/questions/55498140/saving-buffer-on-postgres-bytea-with-typeorm-only-store-10-bytes
   declare imageData: ArrayBuffer | null;
   declare currencyCode: string;
-  declare grossRevenue: number;
+  declare totalCharge: number;
   declare fees: number;
   declare pay: number;
   declare tips: CreationOptional<number>;
+  declare totalCompensation: number;
   declare deliveryTime: CreationOptional<Date>;
+  declare deliveryTypes: DeliveryType[] | null;
+  declare pickupTypes: PickupType[] | null;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 
@@ -39,10 +67,35 @@ class Order extends Model<
   declare setMerchant: HasOneSetAssociationMixin<Merchant, string>;
   declare createMerchant: HasOneCreateAssociationMixin<Merchant>;
 
+  // [Pickup, Dropoff, Return]
+  declare getLocations: HasManyGetAssociationsMixin<Location>;
+  declare addLocation: HasManyAddAssociationMixin<Location, string>;
+  declare addLocations: HasManyAddAssociationsMixin<Location, string>;
+  declare setLocations: HasManySetAssociationsMixin<Location, string>;
+  declare removeLocation: HasManyRemoveAssociationMixin<Location, string>;
+  declare removeLocations: HasManyRemoveAssociationsMixin<Location, string>;
+  declare hasLocation: HasManyHasAssociationMixin<Location, string>;
+  declare hasLocations: HasManyHasAssociationsMixin<Location, string>;
+  declare countLocations: HasManyCountAssociationsMixin;
+  declare createLocation: HasManyCreateAssociationMixin<Location>;
+
+  // NOTE: Must include locations when calling and locations must be defined
+  getPickupLocation() {
+    return this.Locations?.at(0)
+  }
+  getDropoffLocation() {
+    return this.Locations?.at(1);
+  }
+  getReturnLocation() {
+    return this.Locations?.at(2);
+  }
+
   declare Merchant?: NonAttribute<Merchant>;
+  declare Locations?: NonAttribute<Location[]>;
 
   declare static associations: {
     Merchant: Association<Courier, Merchant>;
+    Locations: Association<Courier, Location>;
   };
 }
 
@@ -58,6 +111,9 @@ Order.init(
     customerName: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    customerPhoneNumber: {
+      type: DataTypes.STRING,
     },
     status: {
       type: DataTypes.ENUM(
@@ -80,15 +136,6 @@ Order.init(
       defaultValue: [],
       allowNull: false,
     },
-    // TODO: Handle obfuscated coord
-    pickupCoords: {
-      type: DataTypes.GEOMETRY,
-      allowNull: false,
-    },
-    dropoffCoords: {
-      type: DataTypes.GEOMETRY,
-      allowNull: false,
-    },
     items: {
       type: DataTypes.ARRAY(DataTypes.JSON),
       defaultValue: [],
@@ -106,7 +153,7 @@ Order.init(
       allowNull: false,
     },
     // Total amount earned for this order (pay + fees)
-    grossRevenue: {
+    totalCharge: {
       type: DataTypes.FLOAT,
       allowNull: false,
     },
@@ -125,11 +172,22 @@ Order.init(
       allowNull: false,
       defaultValue: 0,
     },
+    totalCompensation: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
     deliveryTime: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
+    deliveryTypes: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+    },
+    pickupTypes: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+    },
+
     imageType: {
       type: DataTypes.STRING,
     },

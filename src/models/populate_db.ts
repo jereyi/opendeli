@@ -1,13 +1,44 @@
 import { createPoint } from "../../test/unit/utils/helper";
 import Merchant from "./merchant.model";
+import Location from "./location.model";
 import Order from "./order.model";
-import { OrderStatus } from "../utils/enum.util";
+import { DeliveryType, OrderStatus, PickupType } from "../utils/enum.util";
 import { Item } from "../utils/types.util";
 
-async function createOrder() {
+async function populate() {
   const merchant = await Merchant.create({
     name: "Hoagie Haven",
-    phoneNumber: "609-921-7723",
+    phoneNumber: "6099217723",
+  });
+  const dropoffLocation = await Location.create({
+    addressLine1: "100 Albert Way",
+    addressLine2: "Princeton, NJ 08542, United States of America",
+    city: "Princeton",
+    state: "New Jersey",
+    street: "Albert Way",
+    houseNumber: "100",
+    longitude: -74.66144382105323,
+    latitude: 40.35686595970042,
+    postCode: "08542",
+    stateCode: "NJ",
+    countryCode: "US",
+    formattedAddress:
+      "100 Albert Way, Princeton, NJ 08542, United States of America",
+  });
+  const pickupLocation = await Location.create({
+    addressLine1: "242 Nassau Street",
+    addressLine2: "Princeton, NJ 08542, United States of America",
+    city: "Princeton",
+    state: "New Jersey",
+    street: "Nassau Street",
+    houseNumber: "244",
+    longitude: -74.66144382105323,
+    latitude: 40.35686595970042,
+    postCode: "08540",
+    stateCode: "NJ",
+    countryCode: "US",
+    formattedAddress:
+      "244 Nassau Street, Princeton, NJ 08540, United States of America",
   });
   const sandwich: Item = {
     name: "SANCHEZ",
@@ -19,18 +50,21 @@ async function createOrder() {
     customerName: "Jane Doe",
     status: OrderStatus.created,
     customerNotes: ["Do not ring the door bell"],
+    customerPhoneNumber: "9804417895",
     courierNotes: [],
-    pickupCoords: createPoint(40.35236470954477, -74.65190830480242),
-    dropoffCoords: createPoint(40.35685462275827, -74.66142994548595),
     items: [sandwich],
     currencyCode: "USD",
-    grossRevenue: 23.32,
+    totalCharge: 23.32,
     fees: 1.5,
     pay: 4.5,
     tips: 1.32,
+    totalCompensation: 5.82,
+    deliveryTypes: [DeliveryType.MeetAtDoor, DeliveryType.CallOnArrival],
+    pickupTypes: [PickupType.DontOpenBags]
   });
   await order.setMerchant(merchant);
+  await order.setLocations([pickupLocation, dropoffLocation])
   console.log("Order created successfully", order);
 }
 
-createOrder()
+populate();

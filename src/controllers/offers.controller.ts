@@ -5,6 +5,7 @@ import { GetOffersReqBody } from "../reqBodies/offers";
 import Courier from "../models/courier.model";
 import Merchant from "../models/merchant.model";
 import { Op } from "sequelize";
+import Location from "../models/location.model";
 var db = require("../models/db"),
   sequelize = db.sequelize;
 
@@ -56,12 +57,19 @@ export async function getOffers(
     }
     const rows = await Order.findAll({
       where,
-      include: includeMerchant ? Merchant : undefined,
+      include: includeMerchant ? [Merchant, Location] : [Location],
     });
-
+    console.log("Fetched offers successfully", rows);
     res
       .status(200)
-      .json({ offers: rows.map((offer: Order) => offer.dataValues) });
+      .json({
+        offers: rows.map((offer: Order) => ({
+          ...offer.dataValues,
+          pickupLocation: offer.getPickupLocation(),
+          dropoffLocation: offer.getDropoffLocation(),
+          returnLocation: offer.getReturnLocation(),
+       }))
+  });
   } catch (error) {
     console.error("getOffers:", error);
     res.status(500).json({ error: "Error fetching offers" });
@@ -71,10 +79,19 @@ export async function getOffers(
 export async function getOffer(req: Request<{ id: string }>, res: Response) {
   try {
     const id = req.params.id;
-    const offer = await Order.findByPk(id);
+    const offer = await Order.findByPk(id, {
+      include: [Location],
+    });
 
     if (offer) {
-      res.status(200).json({ offer });
+      res.status(200).json({
+        offer: {
+          ...offer.dataValues,
+          pickupLocation: offer.getPickupLocation(),
+          dropoffLocation: offer.getDropoffLocation(),
+          returnLocation: offer.getReturnLocation(),
+        },
+      });
     } else {
       res.status(404).json({ message: "Offer not found" });
     }
