@@ -27,31 +27,31 @@ var db = require("./db"),
   sequelize = db.sequelize;
 
 class Comment extends Model<
-  InferAttributes<Comment, { omit: "Replys" }>,
-  InferCreationAttributes<Comment, { omit: "Replys" }>
+  InferAttributes<Comment>,
+  InferCreationAttributes<Comment>
 > {
   declare id: CreationOptional<string>;
   declare text: string | null;
   declare likes: CreationOptional<number>;
   // Parent comment id
-  declare ParentCommentId: ForeignKey<Comment["id"]> | null;
-  declare CommentableId:
+  // declare ParentCommentId: ForeignKey<Comment["id"]> | null;
+  declare commentableId:
     | ForeignKey<Merchant["id"]>
     | ForeignKey<Location["id"]>;
-  declare CommentableType: "merchant" | "location";
+  declare commentableType: "merchant" | "location";
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 
-  declare getReplys: HasManyGetAssociationsMixin<Comment>;
-  declare addReply: HasManyAddAssociationMixin<Comment, string>;
-  declare addReplys: HasManyAddAssociationsMixin<Comment, string>;
-  declare setReplys: HasManySetAssociationsMixin<Comment, string>;
-  declare removeReply: HasManyRemoveAssociationMixin<Comment, string>;
-  declare removeReplys: HasManyRemoveAssociationsMixin<Comment, string>;
-  declare hasReply: HasManyHasAssociationMixin<Comment, string>;
-  declare hasReplys: HasManyHasAssociationsMixin<Comment, string>;
-  declare countReplys: HasManyCountAssociationsMixin;
-  declare createReply: HasManyCreateAssociationMixin<Comment, "ParentCommentId">;
+  // declare getReplys: HasManyGetAssociationsMixin<Comment>;
+  // declare addReply: HasManyAddAssociationMixin<Comment, string>;
+  // declare addReplys: HasManyAddAssociationsMixin<Comment, string>;
+  // declare setReplys: HasManySetAssociationsMixin<Comment, string>;
+  // declare removeReply: HasManyRemoveAssociationMixin<Comment, string>;
+  // declare removeReplys: HasManyRemoveAssociationsMixin<Comment, string>;
+  // declare hasReply: HasManyHasAssociationMixin<Comment, string>;
+  // declare hasReplys: HasManyHasAssociationsMixin<Comment, string>;
+  // declare countReplys: HasManyCountAssociationsMixin;
+  // declare createReply: HasManyCreateAssociationMixin<Comment, "ParentCommentId">;
 
   declare getMerchant: BelongsToGetAssociationMixin<Merchant>;
   declare setMerchant: BelongsToSetAssociationMixin<Merchant, string>;
@@ -62,35 +62,35 @@ class Comment extends Model<
   declare createLocation: BelongsToCreateAssociationMixin<Location>;
 
   getCommentable(options: any) {
-    if (!this.CommentableType) return Promise.resolve(null);
+    if (!this.commentableType) return Promise.resolve(null);
     const mixinMethodName =
-      this.CommentableType == "location" ? "getLocation" : "getMerchant";
+      this.commentableType == "location" ? "getLocation" : "getMerchant";
     return this[mixinMethodName](options);
   }
 
   setCommentable(options: any) {
-    if (!this.CommentableType) return Promise.resolve(null);
+    if (!this.commentableType) return Promise.resolve(null);
     const mixinMethodName =
-      this.CommentableType == "location" ? "setLocation" : "setMerchant";
+      this.commentableType == "location" ? "setLocation" : "setMerchant";
     return this[mixinMethodName](options);
   }
 
   createCommentable(options: any) {
-    if (!this.CommentableType) return Promise.resolve(null);
+    if (!this.commentableType) return Promise.resolve(null);
     const mixinMethodName =
-      this.CommentableType == "location" ? "createLocation" : "createMerchant";
+      this.commentableType == "location" ? "createLocation" : "createMerchant";
     return this[mixinMethodName](options);
   }
 
-  declare getParentComment: BelongsToGetAssociationMixin<Comment>;
-  declare setParentComment: BelongsToSetAssociationMixin<Comment, string>;
-  declare createParentComment: BelongsToCreateAssociationMixin<Comment>;
+  // declare getParentComment: BelongsToGetAssociationMixin<Comment>;
+  // declare setParentComment: BelongsToSetAssociationMixin<Comment, string>;
+  // declare createParentComment: BelongsToCreateAssociationMixin<Comment>;
 
-  declare Replys?: NonAttribute<Comment[]>;
+  declare commentable?: NonAttribute<Location|Merchant>;
 
-  declare static associations: {
-    Replys: Association<Comment, Comment>;
-  };
+  // declare static associations: {
+  //   Replys: Association<Comment, Comment>;
+  // };
 }
 
 Comment.init(
@@ -119,11 +119,11 @@ Comment.init(
       defaultValue: DataTypes.NOW,
       allowNull: false,
     },
-    CommentableId: {
+    commentableId: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    CommentableType: {
+    commentableType: {
       type: DataTypes.STRING,
       allowNull: false,
     },
