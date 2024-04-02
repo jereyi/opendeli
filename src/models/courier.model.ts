@@ -25,14 +25,21 @@ import { Point } from "geojson";
 import Setting from "./setting.model";
 import Earning from "./earning.model";
 import Order from "./order.model";
+import Comment from "./comment.model";
 var db = require("./db"),
   sequelize = db.sequelize;
 
 // TODO: Add indices, primary keys, and default
 
 class Courier extends Model<
-  InferAttributes<Courier, { omit: "Setting" | "Earnings" }>,
-  InferCreationAttributes<Courier, { omit: "Setting" | "Earnings" }>
+  InferAttributes<
+    Courier,
+    { omit: "Setting" | "Earnings" | "Comments" | "AcceptedOrders" }
+  >,
+  InferCreationAttributes<
+    Courier,
+    { omit: "Setting" | "Earnings" | "Comments" | "AcceptedOrders" }
+  >
 > {
   declare id: CreationOptional<string>;
   declare firstName: string;
@@ -63,6 +70,17 @@ class Courier extends Model<
   declare countEarnings: HasManyCountAssociationsMixin;
   declare createEarning: HasManyCreateAssociationMixin<Earning, "CourierId">;
 
+  declare getComments: HasManyGetAssociationsMixin<Comment>;
+  declare addComment: HasManyAddAssociationMixin<Comment, string>;
+  declare addComments: HasManyAddAssociationsMixin<Comment, string>;
+  declare setComments: HasManySetAssociationsMixin<Comment, string>;
+  declare removeComment: HasManyRemoveAssociationMixin<Comment, string>;
+  declare removeComments: HasManyRemoveAssociationsMixin<Comment, string>;
+  declare hasComment: HasManyHasAssociationMixin<Comment, string>;
+  declare hasComments: HasManyHasAssociationsMixin<Comment, string>;
+  declare countComments: HasManyCountAssociationsMixin;
+  declare createComment: HasManyCreateAssociationMixin<Comment, "CourierId">;
+
   declare getAcceptedOrders: HasManyGetAssociationsMixin<Order>;
   declare addAcceptedOrder: HasManyAddAssociationMixin<Order, string>;
   declare addAcceptedOrders: HasManyAddAssociationsMixin<Order, string>;
@@ -83,11 +101,13 @@ class Courier extends Model<
 
   declare Setting?: NonAttribute<Setting>;
   declare Earnings?: NonAttribute<Earning[]>;
+  declare Comments?: NonAttribute<Comment[]>;
   declare AcceptedOrders?: NonAttribute<Order[]>;
 
   declare static associations: {
     Setting: Association<Courier, Setting>;
     Earnings: Association<Courier, Earning>;
+    Comments: Association<Courier, Comment>;
     AcceptedOrders: Association<Courier, Order>;
   };
 }

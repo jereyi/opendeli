@@ -33,22 +33,22 @@ export async function getMerchant(req: Request<{ id: string }>, res: Response) {
   }
 }
 
-export async function getLocations(
-  req: Request<{ id: string }>,
-  res: Response
-) {
-  try {
-    const id = req.params.id;
-    const locations = await (await Merchant.findByPk(id))?.getLocations();
+// export async function getLocations(
+//   req: Request<{ id: string }>,
+//   res: Response
+// ) {
+//   try {
+//     const id = req.params.id;
+//     const locations = await (await Merchant.findByPk(id))?.getLocations();
 
     
-    res.status(200).json({ locations });
+//     res.status(200).json({ locations });
 
-  } catch (error) {
-    console.error("getLocations:", error);
-    res.status(500).json({ error: "Error fetching locations" });
-  }
-}
+//   } catch (error) {
+//     console.error("getLocations:", error);
+//     res.status(500).json({ error: "Error fetching locations" });
+//   }
+// }
 export async function getComments(
   req: Request<{ id: string }>,
   res: Response

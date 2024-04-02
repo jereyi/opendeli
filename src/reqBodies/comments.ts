@@ -1,6 +1,17 @@
 export type CreateCommentReqBody = {
-  text?: string;
+  text: string;
   MerchantId?: string;
   LocationId?: string;
-  CommentId: string;
+  CourierId: string;
+};
+
+export type UpdateCommentReqBody = {
+  text?: string;
+  likes?: number;
+  CourierId: string;
+};
+
+export type DeleteCommentReqBody = {
+  MerchantId?: string;
+  LocationId?: string;
 };

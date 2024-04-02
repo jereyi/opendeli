@@ -3,9 +3,12 @@ import Comment from "../models/comment.model";
 import Merchant from "../models/merchant.model";
 import Location from "../models/location.model";
 import {
-  CreateCommentReqBody
+  CreateCommentReqBody,
+  DeleteCommentReqBody,
+  UpdateCommentReqBody,
 } from "../reqBodies/comments";
 import { ReqParams } from "../reqBodies/common";
+import Courier from "../models/courier.model";
 
 export async function getComments(res: Response) {
   try {
@@ -43,14 +46,43 @@ export async function createComment(
     });
     return;
   }
+  if (!req.body.CourierId) {
+    res.status(400).send({
+      message: "Comment must be associated with a courier",
+    });
+    return;
+  }
   if (!req.body.MerchantId && !req.body.LocationId) {
     res.status(400).send({
       message: "Comment must be associate with a merchant or a location",
     });
     return;
   }
+  if (req.body.MerchantId && req.body.LocationId) {
+    res.status(400).send({
+      message:
+        "Comment cannot be associate with both a merchant and a location",
+    });
+    return;
+  }
   try {
-    const newComment = await Comment.create(req.body);
+    const { text, MerchantId, LocationId, CourierId } = req.body;
+    const newComment = await Comment.create({
+      text,
+      commentableType: MerchantId ? "merchant" : "location",
+      commentableId: MerchantId ?? LocationId,
+      CourierId,
+    });
+
+    const courier = await Courier.findByPk(req.body.CourierId);
+
+    if (courier) {
+      courier.addComment(newComment);
+    } else {
+      res.status(400).json({ message: "Courier does not exist" });
+      await newComment.destroy();
+      return;
+    }
 
     if (req.body.MerchantId) {
       const merchant = await Merchant.findByPk(req.body.MerchantId);
@@ -76,18 +108,6 @@ export async function createComment(
       }
     }
 
-    if (req.body.CommentId) {
-      const parentComment = await Comment.findByPk(req.body.CommentId);
-
-      if (parentComment) {
-        parentComment.addReply(newComment);
-      } else {
-        res.status(400).json({ message: "Parent comment does not exist" });
-        await newComment.destroy();
-        return;
-      }
-    }
-
     res.status(200).json({ message: "Comment created successfully" });
   } catch (error) {
     console.error("createComment:", error);
@@ -96,18 +116,25 @@ export async function createComment(
 }
 
 export async function updateComment(
-  req: Request<{ id: string }, {}, { text: string }>,
+  req: Request<{ id: string }, {}, UpdateCommentReqBody>,
   res: Response
 ) {
-  if (!req.body.text) {
+  const { text, likes, CourierId } = req.body;
+  if (!text && !likes) {
     res.status(400).send({
-      message: "Comment cannot be empty",
+      message: "No updates to be made",
     });
     return;
   }
+  const updates: any = {};
+  if (text) {
+    updates.text = text;
+    updates.CourierId = CourierId;
+  }
+  if (likes) updates.likes = likes;
   try {
     const id = req.params.id;
-    const [affectedRows] = await Comment.update(req.body, {
+    const [affectedRows] = await Comment.update(updates, {
       where: {
         id,
       },
@@ -122,20 +149,48 @@ export async function updateComment(
   }
 }
 
-export async function likeComment(req: Request<{ id: string }>, res: Response) {
+export async function deleteComment(
+  req: Request<{ id: string }, {}, DeleteCommentReqBody>,
+  res: Response
+) {
   try {
     const id = req.params.id;
-    const [affectedRows] = await Comment.increment("likes", {
-      where: {
-        id,
-      },
-    });
+    const { MerchantId, LocationId } = req.body;
 
-    if (!affectedRows)
-      res.status(400).json({ message: "Comment does not exist" });
-    else res.status(200).json({ message: "Comment liked successfully" });
+    if (MerchantId) {
+      const merchant = await Merchant.findByPk(MerchantId);
+      merchant?.removeComment(id);
+    }
+    if (LocationId) {
+      const location = await Location.findByPk(LocationId);
+      location?.removeComment(id);
+    }
+
+    const comment = await Comment.findByPk(id);
+    await comment?.destroy();
+
+    console.log("Comment deleted successfully");
+    res.status(200).json({ message: "Comment deleted successfully" });
   } catch (error) {
-    console.error("likeComment:", error);
-    res.status(500).json({ error: "Error liking comment" });
+    console.error("deleteComment:", error);
+    res.status(500).json({ error: "Error deleting comment" });
   }
 }
+
+// export async function likeComment(req: Request<{ id: string }>, res: Response) {
+//   try {
+//     const id = req.params.id;
+//     const [affectedRows] = await Comment.increment("likes", {
+//       where: {
+//         id,
+//       },
+//     });
+
+//     if (!affectedRows)
+//       res.status(400).json({ message: "Comment does not exist" });
+//     else res.status(200).json({ message: "Comment liked successfully" });
+//   } catch (error) {
+//     console.error("likeComment:", error);
+//     res.status(500).json({ error: "Error liking comment" });
+//   }
+// }

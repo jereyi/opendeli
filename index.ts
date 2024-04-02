@@ -8,6 +8,7 @@ import deliveriesRouter from "./src/routes/deliveries.route";
 import locationsRouter from "./src/routes/locations.route";
 import earningsRouter from "./src/routes/earnings.route";
 import payoutsRouter from "./src/routes/payouts.route";
+import commentsRouter from "./src/routes/comments.routes";
 import dotenv from "dotenv";
 import cors from "cors";
 import "./src/models/associations";
@@ -36,6 +37,7 @@ app.get("/", (req: Request, res: Response) => {
 app.use("/auth", authRouter);
 app.use("/couriers", couriersRouter);
 app.use("/offers", offersRouter);
+app.use("/comments", commentsRouter);
 app.use("/deliveries", deliveriesRouter);
 app.use("/locations", locationsRouter);
 app.use("/earnings", earningsRouter);

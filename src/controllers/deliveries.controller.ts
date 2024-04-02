@@ -9,6 +9,7 @@ import {
 import { Op } from "sequelize";
 import Merchant from "../models/merchant.model";
 import Location from "../models/location.model";
+import Comment from "../models/comment.model";
 
 // Allow filtering by merchant, courier, status, delivery time
 export async function getDeliveries(
@@ -49,7 +50,24 @@ export async function getDeliveries(
     }
     const deliveries = await Order.findAll({
       where,
-      include: includeMerchant ? [Merchant, Location] : [Location],
+      include: [
+        {
+          model: Location,
+          include: [
+            {
+              model: Comment,
+            },
+          ],
+        },
+        {
+          model: Merchant,
+          include: [
+            {
+              model: Comment,
+            },
+          ],
+        },
+      ],
     });
     console.log("Fetched deliveries successfully", deliveries);
     res.status(200).json({
@@ -70,7 +88,24 @@ export async function getDelivery(req: Request<{ id: string }>, res: Response) {
   try {
     const id = req.params.id;
     const delivery = await Order.findByPk(id, {
-      include: [Location],
+      include: [
+        {
+          model: Location,
+          include: [
+            {
+              model: Comment,
+            },
+          ],
+        },
+        {
+          model: Merchant,
+          include: [
+            {
+              model: Comment,
+            },
+          ],
+        },
+      ],
     });
 
     if (delivery) {

@@ -7,6 +7,7 @@ export type GetDeliveriesReqBody = {
   deliveryTime?: Date[];
   timeOperator?: "between" | "before" | "after" | "at";
   includeMerchant?: boolean;
+  includeComments?: boolean;
 };
 
 export type CourierNotesReqBody = {

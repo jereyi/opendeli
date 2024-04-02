@@ -6,4 +6,5 @@ export type GetOffersReqBody = {
   timeOperator?: "between" | "before" | "after" | "at";
   excludedIds?: string[];
   includeMerchant?: boolean;
+  includeComments?: boolean;
 };

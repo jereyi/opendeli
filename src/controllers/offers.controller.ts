@@ -6,6 +6,7 @@ import Courier from "../models/courier.model";
 import Merchant from "../models/merchant.model";
 import { Op } from "sequelize";
 import Location from "../models/location.model";
+import Comment from "../models/comment.model";
 var db = require("../models/db"),
   sequelize = db.sequelize;
 
@@ -21,6 +22,7 @@ export async function getOffers(
       timeOperator,
       excludedIds,
       includeMerchant,
+      includeComments,
     } = req.body;
 
     const where: any = {
@@ -57,19 +59,34 @@ export async function getOffers(
     }
     const rows = await Order.findAll({
       where,
-      include: includeMerchant ? [Merchant, Location] : [Location],
+      include: [
+        {
+          model: Location,
+          include: [
+            {
+              model: Comment,
+            },
+          ],
+        },
+        {
+          model: Merchant,
+          include: [
+            {
+              model: Comment,
+            },
+          ],
+        },
+      ],
     });
     console.log("Fetched offers successfully", rows);
-    res
-      .status(200)
-      .json({
-        offers: rows.map((offer: Order) => ({
-          ...offer.dataValues,
-          pickupLocation: offer.getPickupLocation(),
-          dropoffLocation: offer.getDropoffLocation(),
-          returnLocation: offer.getReturnLocation(),
-       }))
-  });
+    res.status(200).json({
+      offers: rows.map((offer: Order) => ({
+        ...offer.dataValues,
+        pickupLocation: offer.getPickupLocation(),
+        dropoffLocation: offer.getDropoffLocation(),
+        returnLocation: offer.getReturnLocation(),
+      })),
+    });
   } catch (error) {
     console.error("getOffers:", error);
     res.status(500).json({ error: "Error fetching offers" });
@@ -80,7 +97,24 @@ export async function getOffer(req: Request<{ id: string }>, res: Response) {
   try {
     const id = req.params.id;
     const offer = await Order.findByPk(id, {
-      include: [Location],
+      include: [
+        {
+          model: Location,
+          include: [
+            {
+              model: Comment,
+            },
+          ],
+        },
+        {
+          model: Merchant,
+          include: [
+            {
+              model: Comment,
+            },
+          ],
+        },
+      ],
     });
 
     if (offer) {
@@ -171,7 +205,7 @@ export async function rejectOffer(
         ),
       },
       {
-        where: { id: courierId},
+        where: { id: courierId },
         returning: true,
       }
     );

@@ -23,6 +23,13 @@ Setting.belongsTo(Courier, { targetKey: "id" });
 Courier.hasMany(Order, {as: "AcceptedOrders"});
 Order.belongsTo(Courier);
 
+Courier.hasMany(Comment, {
+  sourceKey: "id",
+  foreignKey: "CourierId",
+  onDelete: "CASCADE",
+});
+Comment.belongsTo(Courier);
+
 // Location.belongsToMany(Merchant, {through: LocationMerchant});
 // Merchant.belongsToMany(Location, { through: LocationMerchant });
 

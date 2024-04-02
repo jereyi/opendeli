@@ -5,7 +5,7 @@ import {
   getComment,
   createComment,
   updateComment,
-  likeComment,
+  deleteComment,
 } from "../controllers/comments.controller";
 import { verifyToken } from "../middlewares/auth.middleware";
 
@@ -17,6 +17,8 @@ router.post("/", verifyToken, createComment);
 
 router.patch("/:id", verifyToken, updateComment);
 
-router.patch("/:id/like", verifyToken, likeComment);
+router.post("/delete/:id", verifyToken, deleteComment);
+
+//router.patch("/:id/like", verifyToken, likeComment);
 
 export default router;

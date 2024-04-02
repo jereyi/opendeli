@@ -122,7 +122,7 @@ export async function getCourierFullSettings(req: Request, res: Response) {
     const courier = await Courier.findByPk(id, { include: Setting });
 
     if (courier) {
-      console.log("Courier settings fetched successfully");
+      console.log("Courier settings fetched successfully", courier.Setting?.dataValues);
       res.status(200).json({ settings: courier.Setting?.dataValues});
     } else {
       console.log("getCourierFullSettings: Courier not found");

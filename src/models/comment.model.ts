@@ -23,6 +23,7 @@ import {
 } from "sequelize";
 import Location from "./location.model";
 import Merchant from "./merchant.model";
+import Courier from "./courier.model";
 var db = require("./db"),
   sequelize = db.sequelize;
 
@@ -33,8 +34,7 @@ class Comment extends Model<
   declare id: CreationOptional<string>;
   declare text: string | null;
   declare likes: CreationOptional<number>;
-  // Parent comment id
-  // declare ParentCommentId: ForeignKey<Comment["id"]> | null;
+  declare CourierId: ForeignKey<Courier["id"]>;
   declare commentableId:
     | ForeignKey<Merchant["id"]>
     | ForeignKey<Location["id"]>;
@@ -68,19 +68,19 @@ class Comment extends Model<
     return this[mixinMethodName](options);
   }
 
-  setCommentable(options: any) {
-    if (!this.commentableType) return Promise.resolve(null);
-    const mixinMethodName =
-      this.commentableType == "location" ? "setLocation" : "setMerchant";
-    return this[mixinMethodName](options);
-  }
+  // setCommentable(options: any) {
+  //   if (!this.commentableType) return Promise.resolve(null);
+  //   const mixinMethodName =
+  //     this.commentableType == "location" ? "setLocation" : "setMerchant";
+  //   return this[mixinMethodName](options);
+  // }
 
-  createCommentable(options: any) {
-    if (!this.commentableType) return Promise.resolve(null);
-    const mixinMethodName =
-      this.commentableType == "location" ? "createLocation" : "createMerchant";
-    return this[mixinMethodName](options);
-  }
+  // createCommentable(options: any) {
+  //   if (!this.commentableType) return Promise.resolve(null);
+  //   const mixinMethodName =
+  //     this.commentableType == "location" ? "createLocation" : "createMerchant";
+  //   return this[mixinMethodName](options);
+  // }
 
   // declare getParentComment: BelongsToGetAssociationMixin<Comment>;
   // declare setParentComment: BelongsToSetAssociationMixin<Comment, string>;
@@ -120,7 +120,7 @@ Comment.init(
       allowNull: false,
     },
     commentableId: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false,
     },
     commentableType: {

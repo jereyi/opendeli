@@ -4,8 +4,18 @@ import Location from "./location.model";
 import Order from "./order.model";
 import { DeliveryType, OrderStatus, PickupType } from "../utils/enum.util";
 import { Item } from "../utils/types.util";
+import Courier from "./courier.model";
+import bcrypt from "bcrypt";
 
 async function populate() {
+  const courier = await Courier.create({
+    firstName: "Jessie",
+    lastName: "Ereyi",
+    email: "jereyi@princeton.edu",
+    phoneNumber: "9804417895",
+    password: await bcrypt.hash("J0e7s2s7e!", 10),
+  });
+  courier.createSetting();
   const merchant = await Merchant.create({
     name: "Hoagie Haven",
     phoneNumber: "6099217723",
@@ -40,6 +50,17 @@ async function populate() {
     formattedAddress:
       "244 Nassau Street, Princeton, NJ 08540, United States of America",
   });
+  courier.createComment({
+    text: "No parking around Hoagie Haven",
+    commentableType: "merchant",
+    commentableId: merchant.id,
+  });
+
+  courier.createComment({
+    text: "Use the code 123456 to get into the building",
+    commentableType: "location",
+    commentableId: dropoffLocation.id,
+  });
   const sandwich: Item = {
     name: "SANCHEZ",
     quantity: 1,
@@ -60,10 +81,10 @@ async function populate() {
     tips: 1.32,
     totalCompensation: 5.82,
     deliveryTypes: [DeliveryType.MeetAtDoor, DeliveryType.CallOnArrival],
-    pickupTypes: [PickupType.DontOpenBags]
+    pickupTypes: [PickupType.DontOpenBags],
   });
   await order.setMerchant(merchant);
-  await order.setLocations([pickupLocation, dropoffLocation])
+  await order.setLocations([pickupLocation, dropoffLocation]);
   console.log("Order created successfully", order);
 }
 
