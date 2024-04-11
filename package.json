@@ -7,7 +7,7 @@
     "build": "npx tsc",
     "start": "node-env-run . --exec nodemon | pino-colada",
     "dev": "node-env-run . --exec nodemon | pino-colada",
-    "test": "NODE_ENV=test vitest --watch --coverage --dir test"
+    "test": "NODE_ENV=test vitest --watch --coverage --no-file-parallelism --dir test"
   },
   "repository": {
     "type": "git",

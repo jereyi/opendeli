@@ -5,20 +5,25 @@ import {
   CourierNotesReqBody,
   GetDeliveriesReqBody,
   IssueReqBody,
+  MarkAsDeliveredReqBody,
 } from "../reqBodies/deliveries";
 import { Op } from "sequelize";
 import Merchant from "../models/merchant.model";
 import Location from "../models/location.model";
 import Comment from "../models/comment.model";
 
-// Allow filtering by merchant, courier, status, delivery time
 export async function getDeliveries(
   req: Request<{}, {}, GetDeliveriesReqBody>,
   res: Response
 ) {
   try {
-    const { merchantIds, courierIds, statuses, deliveryTime, timeOperator, includeMerchant} =
-      req.body;
+    const {
+      merchantIds,
+      courierIds,
+      statuses,
+      deliveryTime,
+      timeOperator,
+    } = req.body;
 
     const where: any = {};
 
@@ -108,7 +113,7 @@ export async function getDelivery(req: Request<{ id: string }>, res: Response) {
       ],
     });
 
-    if (delivery) {
+    if (delivery && delivery.status != "created") {
       res.status(200).json({
         delivery: {
           ...delivery.dataValues,
@@ -126,25 +131,23 @@ export async function getDelivery(req: Request<{ id: string }>, res: Response) {
   }
 }
 
-// Use `undispatch` to set status to `created` and `cancelDelivery` to set status to `canceled`
+// NOTE: To convert a delivery back to an order, set its status to `created`
 export async function updateDeliveryStatus(
   req: Request<{ id: string }, {}, { status: OrderStatus }>,
   res: Response
 ) {
-        if (
-          req.body.status == OrderStatus["created"] ||
-          req.body.status == OrderStatus["canceled"]
-        ) {
-          res.status(400).json({
-            message:
-              "Use `undispatch` to set status to `created` and `cancelDelivery` to set status to `canceled`",
-          });
-        }
   try {
     const id = req.params.id;
+    const { status } = req.body;
 
-    const [affectedRows] = await Order.update(
-      req.body,
+    if (status == OrderStatus.dropped_off) {
+      res.status(400).json({ message: "Use mark as delivered to change status to delivered"
+      });
+      return;
+    } 
+
+    const [affectedCount] = await Order.update(
+      { status },
       {
         where: {
           id,
@@ -152,8 +155,36 @@ export async function updateDeliveryStatus(
       }
     );
 
-    if (affectedRows) {
-      res.status(200).json({ message: "Delivery status updated successfully" });
+    if (affectedCount) {
+      const delivery = await Order.findByPk(id, {
+        include: [
+          {
+            model: Location,
+            include: [
+              {
+                model: Comment,
+              },
+            ],
+          },
+          {
+            model: Merchant,
+            include: [
+              {
+                model: Comment,
+              },
+            ],
+          },
+        ],
+      });
+      console.log("Delivery status updated successfully");
+      res.status(200).json({
+        delivery: {
+          ...delivery!.dataValues,
+          pickupLocation: delivery!.getPickupLocation(),
+          dropoffLocation: delivery!.getDropoffLocation(),
+          returnLocation: delivery!.getReturnLocation(),
+        },
+      });
     } else {
       res.status(404).json({ message: "Delivery not found" });
     }
@@ -228,33 +259,6 @@ export async function reportIssue(
   }
 }
 
-// Convert delivery back to an offer
-export async function undispatch(req: Request<{ id: string }>, res: Response) {
-  try {
-    const id = req.params.id;
-    const [affectedRows] = await Order.update(
-      {
-        status: OrderStatus["created"],
-        CourierId: null,
-      },
-      {
-        where: {
-          id,
-        },
-      }
-    );
-
-    if (affectedRows) {
-      res.status(200).json({ message: "Delivery undispatched successfully" });
-    } else {
-      res.status(404).json({ message: "Delivery not found" });
-    }
-  } catch (error) {
-    console.error("undispatch:", error);
-    res.status(500).json({ error: "Error fetching delivery" });
-  }
-}
-
 export async function cancelDelivery(
   req: Request<{ id: string }>,
   res: Response
@@ -285,30 +289,61 @@ export async function cancelDelivery(
 }
 
 // TODO: Implement matrix integration
-export async function contactCustomer(req: Request, res: Response) { }
+export async function contactCustomer(req: Request, res: Response) {}
 
-export async function markAsDelivered(req: Request<{ id: string }, {}, { photo?: File }>, res: Response) {
+export async function markAsDelivered(
+  req: Request<{ id: string }, {}, MarkAsDeliveredReqBody>,
+  res: Response
+) {
   try {
     const id = req.params.id;
-    const photo = req.body.photo;
-    const updates: any = {}
-    if (photo) {
-      updates.imageType = photo.type;
-      updates.imageName = photo.name;
-      updates.imageData = await photo.arrayBuffer();
-    }
-    updates.status = "dropped_off"
-    const [affectedRows] = await Order.update(
-      updates,
+    const { notes, photo } = req.body;
+    console.log("photo", photo)
+    const [affectedCount] = await Order.update(
+      {
+        courierNotes: notes,
+        imageData: photo?.data,
+        imageName: photo?.name,
+        imageType: photo?.type,
+        status: OrderStatus.dropped_off,
+      },
       {
         where: {
           id,
         },
       }
-    );
+    ); 
 
-    if (affectedRows) {
-      res.status(200).json({ message: "Mark as delivery successful" });
+    if (affectedCount) {
+      const delivery = await Order.findByPk(id, {
+        include: [
+          {
+            model: Location,
+            include: [
+              {
+                model: Comment,
+              },
+            ],
+          },
+          {
+            model: Merchant,
+            include: [
+              {
+                model: Comment,
+              },
+            ],
+          },
+        ],
+      });
+      console.log("Delivery marked as completed successfully");
+      res.status(200).json({
+        delivery: {
+          ...delivery!.dataValues,
+          pickupLocation: delivery!.getPickupLocation(),
+          dropoffLocation: delivery!.getDropoffLocation(),
+          returnLocation: delivery!.getReturnLocation(),
+        },
+      });
     } else {
       res.status(404).json({ message: "Delivery not found" });
     }

@@ -2,43 +2,42 @@ import {
   Association,
   BelongsToCreateAssociationMixin,
   BelongsToGetAssociationMixin,
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyAddAssociationsMixin,
+  BelongsToManyCountAssociationsMixin,
+  BelongsToManyCreateAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
+  BelongsToManyHasAssociationMixin,
+  BelongsToManyHasAssociationsMixin,
+  BelongsToManyRemoveAssociationMixin,
+  BelongsToManyRemoveAssociationsMixin,
+  BelongsToManySetAssociationsMixin,
   BelongsToSetAssociationMixin,
   CreationOptional,
   DataTypes,
   ForeignKey,
-  HasManyAddAssociationMixin,
-  HasManyAddAssociationsMixin,
-  HasManyCountAssociationsMixin,
-  HasManyCreateAssociationMixin,
-  HasManyGetAssociationsMixin,
-  HasManyHasAssociationMixin,
-  HasManyHasAssociationsMixin,
-  HasManyRemoveAssociationMixin,
-  HasManyRemoveAssociationsMixin,
-  HasManySetAssociationsMixin,
-  HasOneCreateAssociationMixin,
-  HasOneGetAssociationMixin,
-  HasOneSetAssociationMixin,
   InferAttributes,
   InferCreationAttributes,
   Model,
   NonAttribute,
 } from "sequelize";
-import { DeliveryType, OrderStatus, PickupType } from "../utils/enum.util";
+import { DeliveryType, LocationType, OrderStatus, PickupType } from "../utils/enum.util";
 import { Point } from "geojson";
 import { Item } from "../utils/types.util";
 import Merchant from "./merchant.model";
 import Courier from "./courier.model";
 import Location from "./location.model";
+import OrderLocation from "./orderlocation.model";
 var db = require("./db"),
   sequelize = db.sequelize;
 
 class Order extends Model<
-  InferAttributes<Order, { omit: "Merchant" }>,
-  InferCreationAttributes<Order, { omit: "Merchant" }>
+  InferAttributes<Order, { omit: "Locations" }>,
+  InferCreationAttributes<Order, { omit: "Locations" }>
 > {
   declare id: CreationOptional<string>;
   declare CourierId: ForeignKey<Courier["id"]> | null;
+  declare MerchantId: ForeignKey<Merchant["id"]> | null;
   declare customerName: string;
   declare customerPhoneNumber: string | null;
   declare status: OrderStatus;
@@ -49,8 +48,8 @@ class Order extends Model<
   declare undeliverableReason: string | null;
   declare imageType: string | null;
   declare imageName: string | null;
-  // https://stackoverflow.com/questions/55498140/saving-buffer-on-postgres-bytea-with-typeorm-only-store-10-bytes
-  declare imageData: ArrayBuffer | null;
+  // USEFUL INFO: https://stackoverflow.com/questions/55498140/saving-buffer-on-postgres-bytea-with-typeorm-only-store-10-bytes
+  declare imageData: Blob | null;
   declare currencyCode: string;
   declare totalCharge: number;
   declare fees: number;
@@ -63,45 +62,46 @@ class Order extends Model<
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 
-  declare getMerchant: HasOneGetAssociationMixin<Merchant>;
-  declare setMerchant: HasOneSetAssociationMixin<Merchant, string>;
-  declare createMerchant: HasOneCreateAssociationMixin<Merchant>;
+  declare getMerchant: BelongsToGetAssociationMixin<Merchant>;
+  declare setMerchant: BelongsToSetAssociationMixin<Merchant, string>;
+  declare createMerchant: BelongsToCreateAssociationMixin<Merchant>;
 
-  // [Pickup, Dropoff, Return]
-  declare getLocations: HasManyGetAssociationsMixin<Location>;
-  declare addLocation: HasManyAddAssociationMixin<Location, string>;
-  declare addLocations: HasManyAddAssociationsMixin<Location, string>;
-  declare setLocations: HasManySetAssociationsMixin<Location, string>;
-  declare removeLocation: HasManyRemoveAssociationMixin<Location, string>;
-  declare removeLocations: HasManyRemoveAssociationsMixin<Location, string>;
-  declare hasLocation: HasManyHasAssociationMixin<Location, string>;
-  declare hasLocations: HasManyHasAssociationsMixin<Location, string>;
-  declare countLocations: HasManyCountAssociationsMixin;
-  declare createLocation: HasManyCreateAssociationMixin<Location>;
+  declare getLocations: BelongsToManyGetAssociationsMixin<Location>;
+  declare addLocation: BelongsToManyAddAssociationMixin<Location, string>;
+  declare addLocations: BelongsToManyAddAssociationsMixin<Location, string>;
+  declare setLocations: BelongsToManySetAssociationsMixin<Location, string>;
+  declare removeLocation: BelongsToManyRemoveAssociationMixin<Location, string>;
+  declare removeLocations: BelongsToManyRemoveAssociationsMixin<Location, string>;
+  declare hasLocation: BelongsToManyHasAssociationMixin<Location, string>;
+  declare hasLocations: BelongsToManyHasAssociationsMixin<Location, string>;
+  declare countLocations: BelongsToManyCountAssociationsMixin;
+  declare createLocation: BelongsToManyCreateAssociationMixin<Location>;
 
   // NOTE: Must include locations when calling and locations must be defined
   getPickupLocation() {
-    return this.Locations?.at(0)
+    return this.Locations?.filter(location => location.OrderLocation?.locationType == LocationType.pickup).at(0);
   }
   getDropoffLocation() {
-    return this.Locations?.at(1);
+    return this.Locations?.filter(
+      (location) => location.OrderLocation?.locationType == LocationType.dropoff
+    ).at(0);
   }
   getReturnLocation() {
-    return this.Locations?.at(2);
+    return this.Locations?.filter(
+      (location) => location.OrderLocation?.locationType == LocationType.return
+    ).at(0);
   }
 
-  declare Merchant?: NonAttribute<Merchant>;
   declare Locations?: NonAttribute<Location[]>;
+  declare OrderLocation?: NonAttribute<OrderLocation>;
 
   declare static associations: {
-    Merchant: Association<Courier, Merchant>;
     Locations: Association<Courier, Location>;
   };
 }
 
 Order.init(
   {
-    // Model attributes are defined here
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
@@ -183,9 +183,13 @@ Order.init(
     },
     deliveryTypes: {
       type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false,
+      defaultValue: [],
     },
     pickupTypes: {
       type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false,
+      defaultValue: [],
     },
 
     imageType: {

@@ -15,13 +15,6 @@ describe("auth route", function () {
     });
 
     it("Should register courier successfully", async function () {
-      // const image = await fetch(faker.image.url());
-      // let imageData = await image.blob();
-      // let metadata = {
-      //   type: "image/jpeg",
-      // };
-
-      // let file = new File([imageData], "random.jpg", metadata);
       const reqBody = {
         firstName: faker.person.firstName(),
         lastName: faker.person.lastName(),

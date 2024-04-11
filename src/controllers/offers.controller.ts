@@ -10,23 +10,14 @@ import Comment from "../models/comment.model";
 var db = require("../models/db"),
   sequelize = db.sequelize;
 
-// Allow filtering by merchant and delivery time
 export async function getOffers(
   req: Request<{}, {}, GetOffersReqBody>,
   res: Response
 ) {
   try {
-    const {
-      merchantIds,
-      deliveryTime,
-      timeOperator,
-      excludedIds,
-      includeMerchant,
-      includeComments,
-    } = req.body;
+    const { merchantIds, deliveryTime, timeOperator, excludedIds } = req.body;
 
     const where: any = {
-      CourierId: null,
       status: "created",
     };
 
@@ -82,9 +73,9 @@ export async function getOffers(
     res.status(200).json({
       offers: rows.map((offer: Order) => ({
         ...offer.dataValues,
-        pickupLocation: offer.getPickupLocation(),
-        dropoffLocation: offer.getDropoffLocation(),
-        returnLocation: offer.getReturnLocation(),
+        pickupLocation: offer.getPickupLocation()?.dataValues,
+        dropoffLocation: offer.getDropoffLocation()?.dataValues,
+        returnLocation: offer.getReturnLocation()?.dataValues,
       })),
     });
   } catch (error) {
@@ -117,7 +108,7 @@ export async function getOffer(req: Request<{ id: string }>, res: Response) {
       ],
     });
 
-    if (offer) {
+    if (offer && offer.status == "created") {
       res.status(200).json({
         offer: {
           ...offer.dataValues,
@@ -145,26 +136,25 @@ export async function acceptOffer(
     console.log("accept offer request params and body: ", req.params, req.body);
     const courier = await Courier.findByPk(courierId);
     if (!courier) {
+      console.log("Courier not found");
       res.status(404).json({ message: "Courier not found" });
       return;
     }
 
-    const [affectedRows, order] = await Order.update(
+    const [affectedCount] = await Order.update(
       {
-        status: OrderStatus["dispatched"],
+        status: OrderStatus.dispatched,
         CourierId: courierId,
       },
       {
         where: {
           id,
-          CourierId: null, // Ensures that accepted offers cannot be overwritten
+          status: OrderStatus.created, // Ensures that accepted offers cannot be overwritten
         },
-        returning: true,
       }
     );
 
-    if (affectedRows) {
-      courier.addAcceptedOrder(order.at(0));
+    if (affectedCount > 0) {
       res.status(200).json({ message: "Offer accepted successfully" });
     } else {
       res.status(404).json({ message: "Offer not found" });
@@ -189,11 +179,13 @@ export async function rejectOffer(
     if (!courier) {
       console.log("Courier not found");
       res.status(404).json({ message: "Courier not found" });
+      return;
     }
 
     if (courier!.rejectedOffers.findIndex((offerId) => offerId == id) != -1) {
       console.log("Offer has already been rejected");
       res.status(400).json({ message: "Offer has already been rejected" });
+      return;
     }
 
     const [_, affectedRows] = await Courier.update(

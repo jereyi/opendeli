@@ -4,6 +4,11 @@ export enum OrderSetting {
   auto_reject = "auto_reject",
   manual = "manual",
 }
+export enum UserStatus {
+  online = "online",
+  offline = "offline",
+  last_call = "last_call",
+}
 
 // SETTINGS MODEL
 export enum VehicleType {
@@ -75,12 +80,6 @@ export enum OrderStatus {
   canceled = "canceled",
 }
 
-export enum UserStatus {
-  online = "online",
-  offline = "offline",
-  last_call = "last_call",
-}
-
 export enum DeliveryType {
   LeaveAtDoor = "leave_at_door",
   MeetOutside = "meet_outside",
@@ -94,4 +93,11 @@ export enum PickupType {
   ParkThirdPartyLot = "park_in_lot",
   DontOpenBags = `dont_open_bags`,
   CallOnArrival = "call_on_arrival",
+}
+
+// ORDERLOCATION MODEL
+export enum LocationType {
+  pickup = "pickup",
+  dropoff = "dropoff",
+  return = "return",
 }

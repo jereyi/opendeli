@@ -4,18 +4,7 @@ import {
   InferAttributes,
   InferCreationAttributes,
   Model,
-  HasManyAddAssociationMixin,
-  HasManyGetAssociationsMixin,
-  HasManyRemoveAssociationMixin,
-  HasManySetAssociationsMixin,
-  HasManyAddAssociationsMixin,
-  HasManyRemoveAssociationsMixin,
-  HasManyHasAssociationMixin,
-  HasManyHasAssociationsMixin,
-  HasManyCountAssociationsMixin,
-  HasManyCreateAssociationMixin,
   NonAttribute,
-  Association,
   ForeignKey,
   BelongsToGetAssociationMixin,
   BelongsToSetAssociationMixin,
@@ -34,6 +23,7 @@ class Comment extends Model<
   declare id: CreationOptional<string>;
   declare text: string | null;
   declare likes: CreationOptional<number>;
+  declare likers: CreationOptional<string[]>;
   declare CourierId: ForeignKey<Courier["id"]>;
   declare commentableId:
     | ForeignKey<Merchant["id"]>
@@ -41,17 +31,6 @@ class Comment extends Model<
   declare commentableType: "merchant" | "location";
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
-
-  // declare getReplys: HasManyGetAssociationsMixin<Comment>;
-  // declare addReply: HasManyAddAssociationMixin<Comment, string>;
-  // declare addReplys: HasManyAddAssociationsMixin<Comment, string>;
-  // declare setReplys: HasManySetAssociationsMixin<Comment, string>;
-  // declare removeReply: HasManyRemoveAssociationMixin<Comment, string>;
-  // declare removeReplys: HasManyRemoveAssociationsMixin<Comment, string>;
-  // declare hasReply: HasManyHasAssociationMixin<Comment, string>;
-  // declare hasReplys: HasManyHasAssociationsMixin<Comment, string>;
-  // declare countReplys: HasManyCountAssociationsMixin;
-  // declare createReply: HasManyCreateAssociationMixin<Comment, "ParentCommentId">;
 
   declare getMerchant: BelongsToGetAssociationMixin<Merchant>;
   declare setMerchant: BelongsToSetAssociationMixin<Merchant, string>;
@@ -68,34 +47,11 @@ class Comment extends Model<
     return this[mixinMethodName](options);
   }
 
-  // setCommentable(options: any) {
-  //   if (!this.commentableType) return Promise.resolve(null);
-  //   const mixinMethodName =
-  //     this.commentableType == "location" ? "setLocation" : "setMerchant";
-  //   return this[mixinMethodName](options);
-  // }
-
-  // createCommentable(options: any) {
-  //   if (!this.commentableType) return Promise.resolve(null);
-  //   const mixinMethodName =
-  //     this.commentableType == "location" ? "createLocation" : "createMerchant";
-  //   return this[mixinMethodName](options);
-  // }
-
-  // declare getParentComment: BelongsToGetAssociationMixin<Comment>;
-  // declare setParentComment: BelongsToSetAssociationMixin<Comment, string>;
-  // declare createParentComment: BelongsToCreateAssociationMixin<Comment>;
-
   declare commentable?: NonAttribute<Location|Merchant>;
-
-  // declare static associations: {
-  //   Replys: Association<Comment, Comment>;
-  // };
 }
 
 Comment.init(
   {
-    // Model attributes are defined here
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
@@ -109,6 +65,11 @@ Comment.init(
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    likers: {
+      type: DataTypes.ARRAY(DataTypes.UUID),
+      allowNull: false,
+      defaultValue: []
+    }, 
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

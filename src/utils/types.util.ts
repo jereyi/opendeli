@@ -1,3 +1,5 @@
+import { OrderPreferences } from "./enum.util";
+
 export type ShiftAvailability = {
   sunday: Date[][];
   monday: Date[][];
@@ -16,8 +18,7 @@ export type EarningGoals = {
 export type PayRate = {
   hourlyRate: number;
   perDeliveryRate: number;
-  // Per mile
-  distanceBasedRate: number;
+  distanceBasedRate: number; // Per mile
   surgePricingPreference: number;
   minimumEarningsGuarantee: number;
 };
@@ -25,11 +26,17 @@ export type PayRate = {
 export type Item = {
   name: string;
   quantity?: number;
-  size?: "small" | "medium" | "large";
+  size?: OrderPreferences;
   price: number;
   length?: number;
   width?: number;
   height?: number;
   weight?: number;
   keepUpright?: boolean;
+};
+
+export type Photo = {
+  data: Blob;
+  name: string;
+  type: string;
 };
