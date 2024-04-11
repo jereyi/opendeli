@@ -16,7 +16,4 @@ router.post("/accept/:id", verifyToken, acceptOffer);
 
 router.post("/reject/:id", verifyToken, rejectOffer);
 
-
-
-
 export default router;

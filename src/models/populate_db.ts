@@ -1,8 +1,13 @@
-import { createPoint } from "../../test/unit/utils/helper";
 import Merchant from "./merchant.model";
 import Location from "./location.model";
 import Order from "./order.model";
-import { DeliveryType, OrderStatus, PickupType } from "../utils/enum.util";
+import {
+  DeliveryType,
+  LocationType,
+  OrderPreferences,
+  OrderStatus,
+  PickupType,
+} from "../utils/enum.util";
 import { Item } from "../utils/types.util";
 import Courier from "./courier.model";
 import bcrypt from "bcrypt";
@@ -64,7 +69,7 @@ async function populate() {
   const sandwich: Item = {
     name: "SANCHEZ",
     quantity: 1,
-    size: "small",
+    size: OrderPreferences.small_orders,
     price: 16,
   };
   const order = await Order.create({
@@ -84,7 +89,12 @@ async function populate() {
     pickupTypes: [PickupType.DontOpenBags],
   });
   await order.setMerchant(merchant);
-  await order.setLocations([pickupLocation, dropoffLocation]);
+  await order.addLocation(pickupLocation, {
+    through: { locationType: LocationType.pickup },
+  });
+  await order.addLocation(dropoffLocation, {
+    through: { locationType: LocationType.dropoff },
+  });
   console.log("Order created successfully", order);
 }
 

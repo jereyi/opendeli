@@ -4,21 +4,9 @@ import {
   InferAttributes,
   InferCreationAttributes,
   Model,
-  HasManyAddAssociationMixin,
-  HasManyGetAssociationsMixin,
-  HasManyRemoveAssociationMixin,
-  HasManySetAssociationsMixin,
-  HasManyAddAssociationsMixin,
-  HasManyRemoveAssociationsMixin,
-  HasManyHasAssociationMixin,
-  HasManyHasAssociationsMixin,
-  HasManyCountAssociationsMixin,
-  HasManyCreateAssociationMixin,
   HasOneGetAssociationMixin,
   HasOneSetAssociationMixin,
   HasOneCreateAssociationMixin,
-  NonAttribute,
-  Association,
   ForeignKey,
 } from "sequelize";
 import Courier from "./courier.model";
@@ -45,7 +33,6 @@ class Earning extends Model<
 
 Earning.init(
   {
-    // Model attributes are defined here
     id: {
       type: DataTypes.UUID,
       primaryKey: true,

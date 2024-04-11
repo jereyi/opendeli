@@ -32,13 +32,9 @@ export async function signup(
         email,
         password: hashedPassword,
         phoneNumber,
-        // imageType: profilePicture?.type,
-        // imageName: profilePicture?.name,
-        // imageData: await profilePicture?.arrayBuffer(),
       },
     });
     if (created) {
-      // Create corresponding settings object
       await courier.createSetting();
       const token = jwt.sign(
         { courierId: courier.id },

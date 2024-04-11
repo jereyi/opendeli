@@ -4,16 +4,6 @@ import {
   InferAttributes,
   InferCreationAttributes,
   Model,
-  BelongsToManyAddAssociationMixin,
-  BelongsToManyGetAssociationsMixin,
-  BelongsToManyRemoveAssociationMixin,
-  BelongsToManySetAssociationsMixin,
-  BelongsToManyAddAssociationsMixin,
-  BelongsToManyRemoveAssociationsMixin,
-  BelongsToManyHasAssociationMixin,
-  BelongsToManyHasAssociationsMixin,
-  BelongsToManyCountAssociationsMixin,
-  BelongsToManyCreateAssociationMixin,
   NonAttribute,
   Association,
   HasManyAddAssociationMixin,
@@ -27,18 +17,16 @@ import {
   HasManyRemoveAssociationsMixin,
   HasManySetAssociationsMixin,
 } from "sequelize";
-import Merchant from "./merchant.model";
 import Comment from "./comment.model";
-import { StringColorFormat } from "@faker-js/faker";
+import OrderLocation from "./orderlocation.model";
+import Order from "./order.model";
 var db = require("./db"),
   sequelize = db.sequelize;
 
-// TODO: Verify on delete and on update
 class Location extends Model<
   InferAttributes<Location, { omit: "Comments" }>,
   InferCreationAttributes<Location, { omit: "Comments" }>
   > {
-  // Use some reverse geocoding api to standardize these fields
   declare id: CreationOptional<string>;
   declare addressLine1: string | null;
   declare addressLine2: string | null;
@@ -69,26 +57,12 @@ class Location extends Model<
     "commentableId"
   >;
 
-  // declare getMerchants: BelongsToManyGetAssociationsMixin<Merchant>;
-  // declare addMerchant: BelongsToManyAddAssociationMixin<Merchant, string>;
-  // declare addMerchants: BelongsToManyAddAssociationsMixin<Merchant, string>;
-  // declare setMerchants: BelongsToManySetAssociationsMixin<Merchant, string>;
-  // declare removeMerchant: BelongsToManyRemoveAssociationMixin<Merchant, string>;
-  // declare removeMerchants: BelongsToManyRemoveAssociationsMixin<
-  //   Merchant,
-  //   string
-  // >;
-  // declare hasMerchant: BelongsToManyHasAssociationMixin<Merchant, string>;
-  // declare hasMerchants: BelongsToManyHasAssociationsMixin<Merchant, string>;
-  // declare countMerchants: BelongsToManyCountAssociationsMixin;
-  // declare createMerchant: BelongsToManyCreateAssociationMixin<Merchant>;
-
   declare Comments?: NonAttribute<Comment[]>;
-  // declare Merchants?: NonAttribute<Merchant[]>;
+  declare OrderLocation?: NonAttribute<OrderLocation>;
 
   declare static associations: {
     Comments: Association<Location, Comment>;
-    // Merchants: Association<Location, Merchant>;
+    Orders: Association<Location, Order>;
   };
 }
 Location.init(
@@ -148,7 +122,6 @@ Location.init(
     },
   },
   {
-    // Other model options go here
     tableName: "locations",
     sequelize,
   }

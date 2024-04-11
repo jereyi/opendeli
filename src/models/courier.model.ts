@@ -29,8 +29,6 @@ import Comment from "./comment.model";
 var db = require("./db"),
   sequelize = db.sequelize;
 
-// TODO: Add indices, primary keys, and default
-
 class Courier extends Model<
   InferAttributes<
     Courier,
@@ -47,10 +45,6 @@ class Courier extends Model<
   declare email: string;
   declare password: string;
   declare phoneNumber: string | null;
-  // declare imageType: string | null;
-  // declare imageName: string | null;
-  // // https://stackoverflow.com/questions/55498140/saving-buffer-on-postgres-bytea-with-typeorm-only-store-10-bytes
-  // declare imageData: ArrayBuffer | null;
   declare node_uri: CreationOptional<string>;
   declare status: CreationOptional<UserStatus>;
   declare orderSetting: OrderSetting | null;
@@ -114,7 +108,6 @@ class Courier extends Model<
 
 Courier.init(
   {
-    // Model attributes are defined here
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
@@ -146,15 +139,6 @@ Courier.init(
       type: DataTypes.STRING,
       unique: true,
     },
-    // imageType: {
-    //   type: DataTypes.STRING,
-    // },
-    // imageName: {
-    //   type: DataTypes.STRING,
-    // },
-    // imageData: {
-    //   type: DataTypes.BLOB('long'),
-    // },
     status: {
       type: DataTypes.ENUM('online', 'offline', 'last_call'),
       defaultValue: 'offline',
@@ -169,7 +153,7 @@ Courier.init(
       type: DataTypes.GEOMETRY,
     },
     rejectedOffers: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
+      type: DataTypes.ARRAY(DataTypes.UUID),
       defaultValue: [],
       allowNull: false,
     },

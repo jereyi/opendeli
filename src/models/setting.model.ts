@@ -49,15 +49,12 @@ class Setting extends Model<
 
 Setting.init(
   {
-    // Model attributes are defined here
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false,
       defaultValue: DataTypes.UUIDV4,
     },
-    // Documentation on usage: https://sequelize.org/api/v6/class/src/data-types.js~geometry
-    // TODO: Add PostGis extension: https://postgis.net/documentation/getting_started/
     deliveryPolygon: {
       type: DataTypes.GEOMETRY,
     },
@@ -72,7 +69,7 @@ Setting.init(
     },
     preferredAreas: {
       type: DataTypes.ARRAY(DataTypes.STRING),
-      defaultValue: []
+      defaultValue: [],
     },
     shiftAvailability: {
       type: DataTypes.JSON,
@@ -84,9 +81,8 @@ Setting.init(
         thursday: [],
         friday: [],
         saturday: [],
-      }
+      },
     },
-    // Guard array against duplicates
     orderPreferences: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       defaultValue: [],

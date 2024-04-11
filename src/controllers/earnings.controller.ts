@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Earning from "../models/earning.model";
 
-// Filter by courier ID
+// TODO: Filter by courier ID
 export async function getEarnings(
   req: Request<{}, {}, { courierId: string }>,
   res: Response

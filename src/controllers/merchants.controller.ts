@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
 import { GetOffersReqBody } from "../reqBodies/offers";
 import Merchant from "../models/merchant.model";
+import Comment from "../models/comment.model";
 
 
 export async function getMerchants(
-  req: Request<{}, {}, GetOffersReqBody>,
-  res: Response
+  req: Request, res: Response
 ) {
   try {
-    const merchants = await Merchant.findAll();
+    const merchants = await Merchant.findAll({ include: Comment });
 
     res.status(200).json({ merchants });
   } catch (error) {
@@ -20,7 +20,7 @@ export async function getMerchants(
 export async function getMerchant(req: Request<{ id: string }>, res: Response) {
   try {
     const id = req.params.id;
-    const merchant = await Merchant.findByPk(id);
+    const merchant = await Merchant.findByPk(id, { include: Comment });
 
     if (merchant) {
       res.status(200).json({ merchant });
@@ -30,36 +30,5 @@ export async function getMerchant(req: Request<{ id: string }>, res: Response) {
   } catch (error) {
     console.error("getMerchant:", error);
     res.status(500).json({ error: "Error fetching merchant" });
-  }
-}
-
-// export async function getLocations(
-//   req: Request<{ id: string }>,
-//   res: Response
-// ) {
-//   try {
-//     const id = req.params.id;
-//     const locations = await (await Merchant.findByPk(id))?.getLocations();
-
-    
-//     res.status(200).json({ locations });
-
-//   } catch (error) {
-//     console.error("getLocations:", error);
-//     res.status(500).json({ error: "Error fetching locations" });
-//   }
-// }
-export async function getComments(
-  req: Request<{ id: string }>,
-  res: Response
-) {
-  try {
-    const id = req.params.id;
-    const comments = await(await Merchant.findByPk(id))?.getComments();
-
-    res.status(200).json({ comments });
-  } catch (error) {
-    console.error("getComments:", error);
-    res.status(500).json({ error: "Error fetching comments" });
   }
 }

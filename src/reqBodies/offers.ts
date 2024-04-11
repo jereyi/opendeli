@@ -5,6 +5,4 @@ export type GetOffersReqBody = {
   deliveryTime?: Date[];
   timeOperator?: "between" | "before" | "after" | "at";
   excludedIds?: string[];
-  includeMerchant?: boolean;
-  includeComments?: boolean;
 };

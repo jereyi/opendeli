@@ -1,15 +1,5 @@
 import {
   Association,
-  BelongsToManyAddAssociationMixin,
-  BelongsToManyAddAssociationsMixin,
-  BelongsToManyCountAssociationsMixin,
-  BelongsToManyCreateAssociationMixin,
-  BelongsToManyGetAssociationsMixin,
-  BelongsToManyHasAssociationMixin,
-  BelongsToManyHasAssociationsMixin,
-  BelongsToManyRemoveAssociationMixin,
-  BelongsToManyRemoveAssociationsMixin,
-  BelongsToManySetAssociationsMixin,
   DataTypes,
   HasManyAddAssociationMixin,
   HasManyAddAssociationsMixin,
@@ -32,8 +22,6 @@ import Comment from "./comment.model";
 var db = require("./db"),
   sequelize = db.sequelize;
 
-// TODO: Add indices, primary keys, and default
-// TODO: Fix associaitions
 class Merchant extends Model<
   InferAttributes<Merchant, { omit: "Comments" }>,
   InferCreationAttributes<Merchant, { omit: "Comments" }>
@@ -59,32 +47,15 @@ class Merchant extends Model<
     "commentableId"
   >;
 
-  // declare getLocations: BelongsToManyGetAssociationsMixin<Location>;
-  // declare addLocation: BelongsToManyAddAssociationMixin<Location, string>;
-  // declare addLocations: BelongsToManyAddAssociationsMixin<Location, string>;
-  // declare setLocations: BelongsToManySetAssociationsMixin<Location, string>;
-  // declare removeLocation: BelongsToManyRemoveAssociationMixin<Location, string>;
-  // declare removeLocations: BelongsToManyRemoveAssociationsMixin<
-  //   Location,
-  //   string
-  // >;
-  // declare hasLocation: BelongsToManyHasAssociationMixin<Location, string>;
-  // declare hasLocations: BelongsToManyHasAssociationsMixin<Location, string>;
-  // declare countLocations: BelongsToManyCountAssociationsMixin;
-  // declare createLocation: BelongsToManyCreateAssociationMixin<Location>;
-
   declare Comments?: NonAttribute<Comment[]>;
-  // declare Locations?: NonAttribute<Location[]>;
 
   declare static associations: {
     Comments: Association<Location, Comment>;
-    // Locations: Association<Location, Location>;
   };
 }
 
 Merchant.init(
   {
-    // Model attributes are defined here
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
