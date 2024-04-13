@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "build": "npx tsc",
-    "start": "node-env-run . --exec nodemon | pino-colada",
+    "start": "ts-node .",
     "dev": "node-env-run . --exec nodemon | pino-colada",
     "test": "NODE_ENV=test vitest --watch --coverage --no-file-parallelism --dir test"
   },
@@ -36,7 +36,6 @@
     "pg": "^8.11.3",
     "pg-hstore": "^2.3.4",
     "pino-colada": "^2.2.2",
-    "nodemon": "^3.0.3",
     "sequelize": "^6.37.0",
     "sinon": "^17.0.1",
     "sqlite3": "^5.1.7",
