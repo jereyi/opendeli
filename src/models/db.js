@@ -2,18 +2,19 @@ var Sequelize = require("sequelize");
 var dotenv = require("dotenv");
 dotenv.config();
 
-var sequelize = new Sequelize(
-  process.env.NODE_ENV == "test"
-    ? process.env.TEST_DATABASE_NAME
-    : process.env.DATABASE_NAME,
-  process.env.DATABASE_USERNAME,
-  process.env.DATABASE_PASSWORD,
-  {
-    host: process.env.DATABASE_HOST,
-    port: parseInt(process.env.DATABASE_PORT),
-    dialect: "postgres",
-  }
-);
+var sequelize;
+if (process.env.NODE_ENV == "test")
+  sequelize = new Sequelize(
+    process.env.TEST_DATABASE_NAME,
+    process.env.DATABASE_USERNAME,
+    process.env.DATABASE_PASSWORD,
+    {
+      host: process.env.DATABASE_HOST,
+      port: parseInt(process.env.DATABASE_PORT),
+      dialect: "postgres",
+    }
+  );
+else sequelize = new Sequelize(process.env.DATABASE_URL);
 
 try {
   sequelize
