@@ -14,6 +14,17 @@ if (process.env.NODE_ENV == "test")
       dialect: "postgres",
     }
   );
+else if (process.env.NODE_ENV == "dev")
+  sequelize = new Sequelize(
+    process.env.DATABASE_NAME,
+    process.env.DATABASE_USERNAME,
+    process.env.DATABASE_PASSWORD,
+    {
+      host: process.env.DATABASE_HOST,
+      port: parseInt(process.env.DATABASE_PORT),
+      dialect: "postgres",
+    }
+  );
 else
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: "postgres",
