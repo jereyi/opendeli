@@ -171,6 +171,7 @@ export async function updateCourier(
     });
 
     if (affectedCount > 0) {
+      console.log("updateCourier", affectedRows[0].dataValues);
       res.status(200).json({ courier: affectedRows[0].dataValues });
     } else {
       console.log("updateCourier: Courier not found");
